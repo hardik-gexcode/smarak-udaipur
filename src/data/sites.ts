@@ -269,6 +269,7 @@ export const SITES: Site[] = [
   {
     id: 'nagda-sas-bahu',
     area: 'nathdwara',
+    img: '/img/nagda-sas-bahu.png',
     themes: ['history','art','spiritual'],
     mapQ: 'Sas Bahu Temples Nagda',
     name: { en: 'Sas-Bahu Temples, Nagda', hi: 'सास-बहू मंदिर, नागदा' },
@@ -292,6 +293,7 @@ export const SITES: Site[] = [
   {
     id: 'chittorgarh-fort',
     area: 'chittorgarh',
+    img: '/img/chittorgarh-fort.png',
     themes: ['history','photo','nature'],
     mapQ: 'Chittorgarh Fort',
     name: { en: 'Chittorgarh Fort', hi: 'चित्तौड़गढ़ किला' },
@@ -315,6 +317,7 @@ export const SITES: Site[] = [
   {
     id: 'vijay-stambh',
     area: 'chittorgarh',
+    img: '/img/vijay-stambh.png',
     themes: ['history','art','photo'],
     mapQ: 'Vijay Stambh Chittorgarh',
     name: { en: 'Vijay Stambh (Tower of Victory)', hi: 'विजय स्तंभ' },
@@ -338,6 +341,7 @@ export const SITES: Site[] = [
   {
     id: 'kumbhalgarh',
     area: 'kumbhalgarh',
+    img: '/img/kumbhalgarh.png',
     themes: ['history','nature','photo'],
     mapQ: 'Kumbhalgarh Fort',
     name: { en: 'Kumbhalgarh Fort', hi: 'कुम्भलगढ़ किला' },
@@ -361,6 +365,7 @@ export const SITES: Site[] = [
   {
     id: 'ranakpur',
     area: 'kumbhalgarh',
+    img: '/img/ranakpur.png',
     themes: ['spiritual','art','history'],
     mapQ: 'Ranakpur Jain Temple',
     name: { en: 'Ranakpur Jain Temple', hi: 'रणकपुर जैन मंदिर' },
@@ -384,6 +389,7 @@ export const SITES: Site[] = [
   {
     id: 'haldighati',
     area: 'nathdwara',
+    img: '/img/haldighati.png',
     themes: ['history','nature','photo'],
     mapQ: 'Haldighati Rajsamand',
     name: { en: 'Haldighati', hi: 'हल्दीघाटी' },
@@ -407,6 +413,7 @@ export const SITES: Site[] = [
   {
     id: 'fateh-sagar',
     area: 'udaipur',
+    img: '/img/fateh-sagar.png',
     themes: ['nature','photo'],
     mapQ: 'Fateh Sagar Lake Udaipur',
     name: { en: 'Fateh Sagar Lake', hi: 'फ़तेह सागर झील' },
