@@ -19,11 +19,11 @@ function collectEnglish(): Record<string, string> {
 
 // Bump the cache version whenever translation behavior changes. Earlier releases
 // could cache untranslated English strings as if they were a completed pack.
-const storeKey = (code: string) => `smarak.pack.v2.${Object.keys(collectEnglish()).length}.${code}`;
+const storeKey = (code: string) => `smarak.pack.v3.${Object.keys(collectEnglish()).length}.${code}`;
 
 /** Writes translated strings into the live data objects, which fall back to English for anything missing. */
-function applyPack(code: string, pack: Record<string, string>) {
-  packs[code] = pack;
+function applyPack(code: string, pack: Record<string, string>, complete = true) {
+  if (complete) packs[code] = pack;
   for (const s of SITES) for (const f of SITE_FIELDS) { const v = pack[`s:${s.id}.${f}`]; if (v) s[f][code] = v; }
   for (const p of PARTNERS) {
     const c = pack[`p:${p.id}.craft`]; if (c && p.craft) p.craft[code] = c;
@@ -60,15 +60,20 @@ export async function downloadPack(code: string, onProgress: (done: number, tota
   for (let i = 0; i < chunks.length; i++) {
     const r = await api<{ strings?: Record<string, string> }>('/api/translate', { lang: code, langName: LANGS[code]?.english ?? code, strings: Object.fromEntries(chunks[i]) }, 60000);
     const strings = r.data?.strings;
-    const expected = chunks[i];
-    const returnedCount = strings ? expected.filter(([key]) => typeof strings[key] === 'string' && strings[key].trim()).length : 0;
-    // Do not report success or cache an English fallback when the remote service
-    // returned no translation (the previous behavior made the picker look broken).
-    if (!r.ok || !strings || returnedCount < Math.max(1, Math.ceil(expected.length * 0.8))) return false;
+    if (!r.ok || !strings) {
+      if (!Object.keys(pack).length) return false;
+      break;
+    }
     Object.assign(pack, strings);
     onProgress(i + 1, chunks.length);
   }
-  try { localStorage.setItem(storeKey(code), JSON.stringify(pack)); } catch { /* storage full: still usable this session */ }
-  applyPack(code, pack);
+  const complete = Object.keys(pack).length === entries.length;
+  if (!Object.keys(pack).length) return false;
+  if (complete) {
+    try { localStorage.setItem(storeKey(code), JSON.stringify(pack)); } catch { /* storage full: still usable this session */ }
+  }
+  // A partial network response still gives the traveller translated content;
+  // missing entries fall back to English and the next selection can retry.
+  applyPack(code, pack, complete);
   return true;
 }

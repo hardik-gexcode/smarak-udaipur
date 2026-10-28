@@ -31,9 +31,9 @@ export default async function handler(req: any, res: any) {
       url.searchParams.set('dt', 't');
       url.searchParams.set('q', value);
 
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 SMARAK/1.0' } });
+          const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(3000) });
           if (response.ok) {
             const data: any = await response.json();
             const output = data?.[0]?.map((part: any) => part?.[0] ?? '').join('').trim();
@@ -41,15 +41,13 @@ export default async function handler(req: any, res: any) {
           }
           if (response.status !== 429 && response.status < 500) break;
         } catch { /* retry transient network failures */ }
-        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+        if (attempt < 1) await new Promise((resolve) => setTimeout(resolve, 250));
       }
     }
   });
   await Promise.all(workers);
 
   const usable = Object.keys(translated).length;
-  if (usable < Math.max(1, Math.ceil(entries.length * 0.55))) {
-    return res.status(502).json({ error: 'translation provider returned too few strings', translated: usable, expected: entries.length });
-  }
+  if (!usable) return res.status(502).json({ error: 'translation provider unavailable', translated: 0, expected: entries.length });
   return res.status(200).json({ strings: translated });
 }
