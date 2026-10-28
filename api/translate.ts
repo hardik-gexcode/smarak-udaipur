@@ -1,68 +1,55 @@
-// Translates app strings with Gemini so any traveller can use the app in their own language.
-// Env: GEMINI_API_KEY (and optionally GEMINI_MODEL). The client caches the result on the device.
+// Keyless regional text translation. The client sends small batches through this
+// same-origin Vercel function so browsers and installed PWAs share the same path.
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  const key = process.env.GEMINI_API_KEY;
 
-  const { lang, langName, strings } = req.body ?? {};
-  if (!langName || typeof strings !== 'object' || !strings) return res.status(400).json({ error: 'bad request' });
-  const entries = Object.entries(strings as Record<string, string>);
-  if (entries.length > 60 || entries.reduce((n, [, v]) => n + String(v).length, 0) > 9000) return res.status(413).json({ error: 'too large' });
-
-  if (key) {
-    const prompt =
-      `Translate the values of this JSON object from English into ${String(langName).slice(0, 40)} (${String(lang).slice(0, 8)}). ` +
-      `Keep every key exactly as is. Keep placeholders like {name}, {d}, {h}, {p}, {c} unchanged. Keep brand and place names ` +
-      `(SMARAK, Udaipur, Chittorgarh, Eklingji, Shrinathji, etc.) in their usual form for that language. Use natural, friendly tourist-guide wording. ` +
-      `Return ONLY the JSON object.\n${JSON.stringify(strings)}`;
-
-    try {
-      const models = [...new Set([process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'].filter(Boolean))] as string[];
-      for (const model of models) {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 } }),
-        });
-        if (!r.ok) continue;
-        const j: any = await r.json();
-        const text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('') ?? '';
-        try {
-          const out = JSON.parse(text);
-          const clean: Record<string, string> = {};
-          for (const [k] of entries) if (typeof out[k] === 'string') clean[k] = out[k];
-          if (Object.keys(clean).length) return res.status(200).json({ strings: clean });
-        } catch { /* try the next model */ }
-      }
-    } catch {}
+  const { lang, strings } = req.body ?? {};
+  if (typeof lang !== 'string' || !/^[a-z]{2,3}$/i.test(lang) || typeof strings !== 'object' || !strings || Array.isArray(strings)) {
+    return res.status(400).json({ error: 'bad request' });
+  }
+  const entries = Object.entries(strings as Record<string, unknown>);
+  if (!entries.length || entries.length > 30 || entries.some(([, v]) => typeof v !== 'string') || entries.reduce((n, [, v]) => n + String(v).length, 0) > 4000) {
+    return res.status(413).json({ error: 'translation batch too large' });
   }
 
-  // Fallback: Free translation API if Gemini key is missing or models are unavailable
-  try {
-    const targetLang = String(lang).slice(0, 8);
-    const clean: Record<string, string> = {};
-    await Promise.all(
-      entries.map(async ([k, val]) => {
-        try {
-          const u = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(val)}`;
-          const resG = await fetch(u);
-          if (resG.ok) {
-            const data: any = await resG.json();
-            clean[k] = data?.[0]?.map((p: any) => p[0]).join('') || val;
-          } else {
-            clean[k] = val;
-          }
-        } catch {
-          clean[k] = val;
-        }
-      })
-    );
-    if (Object.keys(clean).length) return res.status(200).json({ strings: clean });
-  } catch {}
+  const translated: Record<string, string> = {};
+  // Google's consumer endpoint uses ISO-639 aliases for these two entries.
+  const googleLang = ({ nb: 'no', kok: 'gom' } as Record<string, string>)[lang] ?? lang;
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(5, entries.length) }, async () => {
+    while (cursor < entries.length) {
+      const index = cursor++;
+      const [key, value] = entries[index] as [string, string];
+      const url = new URL('https://translate.googleapis.com/translate_a/single');
+      url.searchParams.set('client', 'gtx');
+      url.searchParams.set('sl', 'en');
+      url.searchParams.set('tl', googleLang);
+      url.searchParams.set('dt', 't');
+      url.searchParams.set('q', value);
 
-  return res.status(200).json({ strings });
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 SMARAK/1.0' } });
+          if (response.ok) {
+            const data: any = await response.json();
+            const output = data?.[0]?.map((part: any) => part?.[0] ?? '').join('').trim();
+            if (output) { translated[key] = output; break; }
+          }
+          if (response.status !== 429 && response.status < 500) break;
+        } catch { /* retry transient network failures */ }
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+      }
+    }
+  });
+  await Promise.all(workers);
+
+  const usable = Object.keys(translated).length;
+  if (usable < Math.max(1, Math.ceil(entries.length * 0.55))) {
+    return res.status(502).json({ error: 'translation provider returned too few strings', translated: usable, expected: entries.length });
+  }
+  return res.status(200).json({ strings: translated });
 }

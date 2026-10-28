@@ -77,9 +77,7 @@ Alternative: Resend (`RESEND_API_KEY`, `AUTH_SECRET`, and a verified domain in `
 
 **3. Phone verification codes.** Create a Twilio Verify service and set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_VERIFY_SERVICE_SID` in your local `.env` and Vercel's Environment Variables. Phone numbers must include their country calling code in E.164 format (for example, `+919876543210`). Twilio sends and verifies the code; SMARAK does not store the code. SMS charges and country delivery rules depend on your Twilio account.
 
-**4. Translation into regional languages.** Create a Gemini API key at aistudio.google.com and set `GEMINI_API_KEY` in Vercel's Environment Variables. This key is used only to translate app and site content into non-English/Hindi languages; Ask Guide does not call Gemini. The first translation is cached on the device for offline use. Redeploy after adding the variable.
-
-The default model is `gemini-2.5-flash` (also falls back to `gemini-2.0-flash` and `gemini-1.5-flash`). If you override `GEMINI_MODEL` in Vercel, use a model ID enabled for your Gemini API project. Free Google Translate fallback is built-in if Gemini is unconfigured.
+**4. Regional text translation.** No API key is needed. The Vercel `/api/translate` function requests translations from Google's public translation endpoint, then caches a complete language pack on the device for offline use. The first download needs an internet connection. This public endpoint may rate-limit requests.
 
 **5. Cloud narration in regional languages.** Enable *Cloud Text-to-Speech API* in Google Cloud, create an API key, and set `GOOGLE_TTS_API_KEY` in Vercel. This lets the app speak in the selected language when the device has no matching voice. Redeploy after adding the variable. Without it, speech depends on voices installed on the traveller's device.
 
@@ -93,7 +91,7 @@ After deployment, open `/api/health` on your site. It returns only true/false re
 - Indian travellers: choosing a home state offers its language (including Gujarati, Marathi, Bengali, Tamil, Telugu, Kannada, Malayalam, Punjabi, Odia, Assamese, Urdu, Konkani, Nepali, and Maithili where mapped).
 - International visitors: choosing a country offers its language (French, German, Spanish, Italian, Japanese, Korean, Chinese, Arabic, Hebrew, Russian and more, see `src/lib/langs.ts`).
 - The language button (globe, top right) always lists English, Hindi and the traveller's regional language(s). Right-to-left languages flip the layout.
-- Ask Guide answers from the built-in heritage pack without a cloud AI request. Narration uses the phone's voice for the selected language if one is installed; regional translation still requires `GEMINI_API_KEY`.
+- Ask Guide answers from the built-in heritage pack without a cloud AI request. Narration uses the phone's voice for the selected language if one is installed. Regional text translation is keyless and needs internet for its first download.
 - `/api/health` shows which Vercel integrations have their required environment variables set. It returns readiness flags only, never credentials.
 
 ## 3D models: what is real and what is not
@@ -108,16 +106,16 @@ Photos live in `public/img/<site-id>.jpg` and are picked up automatically by set
 
 Your logo is used as the app icon, adaptive icon, splash and login screen. After `npm run android:add`, run `npm run assets` once to generate all Android icon and splash sizes from `assets/`.
 
-## Optional: enable regional translation
+## Regional translation
 
 ```bash
 npm i -g vercel && vercel
-# In the Vercel dashboard add env var GEMINI_API_KEY for translation only.
+# Translation uses the Vercel /api/translate function; no translation key is required.
 # For cloud Indian voices also add GOOGLE_TTS_API_KEY (Cloud Text-to-Speech API enabled).
 # Then set VITE_API_URL=https://<your-project>.vercel.app in .env and rebuild
 ```
 
-The key never ships inside the app.
+The translation service may rate-limit requests; completed language packs are cached on-device.
 
 ## Put it on GitHub
 

@@ -17,7 +17,9 @@ function collectEnglish(): Record<string, string> {
   return out;
 }
 
-const storeKey = (code: string) => `smarak.pack.${Object.keys(collectEnglish()).length}.${code}`;
+// Bump the cache version whenever translation behavior changes. Earlier releases
+// could cache untranslated English strings as if they were a completed pack.
+const storeKey = (code: string) => `smarak.pack.v2.${Object.keys(collectEnglish()).length}.${code}`;
 
 /** Writes translated strings into the live data objects, which fall back to English for anything missing. */
 function applyPack(code: string, pack: Record<string, string>) {
@@ -42,13 +44,13 @@ export function loadCachedPack(code: string): boolean {
   } catch { return false; }
 }
 
-/** Translates the whole app once (needs the /api/translate endpoint), then caches it on the device for offline use. */
+/** Downloads a complete translation pack, then caches it on the device for offline use. */
 export async function downloadPack(code: string, onProgress: (done: number, total: number) => void): Promise<boolean> {
   const entries = Object.entries(collectEnglish());
   const chunks: [string, string][][] = [];
   let cur: [string, string][] = [], size = 0;
   for (const e of entries) {
-    if (cur.length && (size + e[1].length > 4500 || cur.length >= 40)) { chunks.push(cur); cur = []; size = 0; }
+    if (cur.length && (size + e[1].length > 3200 || cur.length >= 20)) { chunks.push(cur); cur = []; size = 0; }
     cur.push(e); size += e[1].length;
   }
   if (cur.length) chunks.push(cur);
@@ -56,14 +58,13 @@ export async function downloadPack(code: string, onProgress: (done: number, tota
   const pack: Record<string, string> = {};
   onProgress(0, chunks.length);
   for (let i = 0; i < chunks.length; i++) {
-    let strings: Record<string, string> | undefined;
-    try {
-      const r = await api<{ strings?: Record<string, string> }>('/api/translate', { lang: code, langName: LANGS[code]?.english ?? code, strings: Object.fromEntries(chunks[i]) }, 35000);
-      if (r.ok && r.data?.strings) strings = r.data.strings;
-    } catch {}
-    if (!strings) {
-      strings = Object.fromEntries(chunks[i]);
-    }
+    const r = await api<{ strings?: Record<string, string> }>('/api/translate', { lang: code, langName: LANGS[code]?.english ?? code, strings: Object.fromEntries(chunks[i]) }, 60000);
+    const strings = r.data?.strings;
+    const expected = chunks[i];
+    const returnedCount = strings ? expected.filter(([key]) => typeof strings[key] === 'string' && strings[key].trim()).length : 0;
+    // Do not report success or cache an English fallback when the remote service
+    // returned no translation (the previous behavior made the picker look broken).
+    if (!r.ok || !strings || returnedCount < Math.max(1, Math.ceil(expected.length * 0.8))) return false;
     Object.assign(pack, strings);
     onProgress(i + 1, chunks.length);
   }

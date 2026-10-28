@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { SITES, siteById } from '../data/sites';
 import { density, fmtHour, levelOf } from '../lib/crowd';
 import { useApp } from '../lib/app';
@@ -8,6 +9,11 @@ import { UDAIPUR_TZ, clock, differsFromUdaipur, greeting, timeTip, zoneParts } f
 import { splitSentences } from '../lib/voice';
 import { Chip, Icon, LangToggle, Photo } from '../ui';
 
+const mascotIntroKey = 'smarak.mascotIntroPlayed';
+const shouldPlayMascotIntro = () => {
+  try { return !sessionStorage.getItem(mascotIntroKey); } catch { return true; }
+};
+
 export const passId = (name: string) => {
   let h = 7;
   for (const c of name || 'guest') h = (h * 31 + c.charCodeAt(0)) % 100000;
@@ -16,6 +22,13 @@ export const passId = (name: string) => {
 
 export default function Home() {
   const { t, lang, go, passport, traveller, xp, levelKey } = useApp();
+  const [showMascotIntro, setShowMascotIntro] = useState(shouldPlayMascotIntro);
+  useEffect(() => {
+    if (!showMascotIntro) return;
+    try { sessionStorage.setItem(mascotIntroKey, '1'); } catch { /* animate for this visit */ }
+    const timer = window.setTimeout(() => setShowMascotIntro(false), 1450);
+    return () => window.clearTimeout(timer);
+  }, [showMascotIntro]);
   const hot = SITES.filter((s) => s.area === 'udaipur' && s.hotspot);
   const avg = Math.round(hot.reduce((a, s) => a + density(s), 0) / hot.length);
   const quietCount = SITES.filter((s) => levelOf(density(s)) === 'quiet').length;
@@ -45,7 +58,8 @@ export default function Home() {
 
   return (
     <div className="scroll">
-      <div className="hero">
+      <div className="hero home-hero">
+        <img className="home-mascot" src="/namaste-mascot.png" alt="Namaste from Mewar" />
         <div className="top"><LangToggle /></div>
         <small>{g.text}, {first}</small>
         <h1 style={{ fontSize: 36 }}>{t('welcomeMewar')}</h1>
@@ -136,6 +150,7 @@ export default function Home() {
           <button className="btn-round" aria-label="AR" onClick={() => openAr(false)}><Icon n="cube" /></button>
         </div>
       </div>
+      {showMascotIntro && <div className="mascot-intro" aria-hidden="true"><img src="/namaste-mascot.png" alt="" /></div>}
     </div>
   );
 }
