@@ -77,6 +77,11 @@ export const D = {
   phoneProvider: ['Twilio could not send the code. Check the Verify service, account, and allowed destination country in Twilio.', 'Twilio कोड नहीं भेज सका। Twilio में Verify service, account और अनुमति-प्राप्त देश जाँचें।'],
   stages: ['Stage', 'चरण'], codeSentTo: ['We emailed a 6-digit code to', 'हमने 6 अंकों का कोड ईमेल किया:'], codeSentPhone: ['We texted a verification code to', 'हमने सत्यापन कोड SMS किया:'], checkSpam: ['Check your spam folder if it does not arrive.', 'न मिले तो स्पैम फ़ोल्डर देखें।'],
   welcomeSub: ['Forts, temples and lakes of the Maharanas', 'महाराणाओं के किले, मंदिर और झीलें'], chooseLang: ['App language', 'ऐप की भाषा'],
+  googleQuickSignIn: ['Google Sign-in (Demo / Quick Access)', 'Google साइन-इन (डेमो / त्वरित पहुँच)'],
+  googleName: ['Google display name', 'Google नाम'],
+  googleEmail: ['Google email address', 'Google ईमेल पता'],
+  demoModeNotice: ['Demo code generated: use code {code} to verify', 'डेमो कोड जनरेट हुआ: सत्यापित करने के लिए {code} डालें'],
+  codeAutoFilled: ['Demo verification code {code} has been auto-filled.', 'डेमो सत्यापन कोड {code} स्वतः भर दिया गया है।'],
 } as const;
 
 export type Key = keyof typeof D;

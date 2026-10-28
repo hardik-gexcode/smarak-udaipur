@@ -79,7 +79,7 @@ Alternative: Resend (`RESEND_API_KEY`, `AUTH_SECRET`, and a verified domain in `
 
 **4. Translation into regional languages.** Create a Gemini API key at aistudio.google.com and set `GEMINI_API_KEY` in Vercel's Environment Variables. This key is used only to translate app and site content into non-English/Hindi languages; Ask Guide does not call Gemini. The first translation is cached on the device for offline use. Redeploy after adding the variable.
 
-The default model is `gemini-3.8-flash`. If you override `GEMINI_MODEL` in Vercel, use a model ID enabled for your Gemini API project.
+The default model is `gemini-2.5-flash` (also falls back to `gemini-2.0-flash` and `gemini-1.5-flash`). If you override `GEMINI_MODEL` in Vercel, use a model ID enabled for your Gemini API project. Free Google Translate fallback is built-in if Gemini is unconfigured.
 
 **5. Cloud narration in regional languages.** Enable *Cloud Text-to-Speech API* in Google Cloud, create an API key, and set `GOOGLE_TTS_API_KEY` in Vercel. This lets the app speak in the selected language when the device has no matching voice. Redeploy after adding the variable. Without it, speech depends on voices installed on the traveller's device.
 

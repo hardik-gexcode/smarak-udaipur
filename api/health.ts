@@ -16,5 +16,8 @@ export default function handler(req: any, res: any) {
     phone,
     translation: !!process.env.GEMINI_API_KEY,
     cloudSpeech: !!process.env.GOOGLE_TTS_API_KEY,
+    status: 'operational',
+    instantAuthFallback: true,
+    freeTranslationFallback: true,
   });
 }

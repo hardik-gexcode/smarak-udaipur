@@ -204,14 +204,22 @@ export default function ARView({ id }: { id: string }) {
     };
   }, [site.id]);
 
-  const chapter = (c: Chapter) => { setSource(null); say(site[c][lang]); };
+  const chapter = (c: Chapter) => { stop(); setSource(null); say(site[c][lang]); };
 
   const submit = async (text = q) => {
-    if (!text.trim() || busy) return;
-    setBusy(true); setSource(null); stop();
-    const r = await ask(site, text, lang);
-    setBusy(false); setSource(r.source); setQ('');
-    say(r.text, /[\u0900-\u097F]/.test(text) ? 'hi' : lang);
+    const query = (typeof text === 'string' ? text : q).trim();
+    if (!query) return;
+    stop();
+    setBusy(true); setSource(null); setQ('');
+    try {
+      const r = await ask(site, query, lang);
+      setSource(r.source);
+      say(r.text, /[\u0900-\u097F]/.test(query) ? 'hi' : lang);
+    } catch {
+      setSource('unavailable');
+    } finally {
+      setBusy(false);
+    }
   };
   const mic = () => { setListening(true); listen(lang, (txt) => { setQ(txt); submit(txt); }, () => setListening(false)); };
 
@@ -259,11 +267,13 @@ export default function ARView({ id }: { id: string }) {
         </div>
         <form style={{ display: 'flex', gap: 10, alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <input ref={input} className="input" value={q} placeholder={t('askPh')} onChange={(e) => setQ(e.target.value)} />
-          {!speaking && lines.length > 0 && <button type="button" className="btn-round" aria-label="Listen" onClick={() => say(lines.join(' '))}><Icon n="speaker" /></button>}
+          {speaking ? (
+            <button type="button" className="btn-round" aria-label="Stop" onClick={stop} title="Stop voice"><Icon n="stop" /></button>
+          ) : lines.length > 0 ? (
+            <button type="button" className="btn-round" aria-label="Listen" onClick={() => say(lines.join(' '))}><Icon n="speaker" /></button>
+          ) : null}
           {canListen && <button type="button" className={`btn-round ${listening ? 'dark' : ''}`} aria-label="Speak" onClick={mic}><Icon n="mic" /></button>}
-          {speaking
-            ? <button type="button" className="btn-round dark" aria-label="Stop" onClick={stop}><Icon n="stop" /></button>
-            : <button type="submit" className="btn-round dark" aria-label="Send"><Icon n="send" /></button>}
+          <button type="submit" className="btn-round dark" disabled={busy || !q.trim()} aria-label="Send"><Icon n="send" /></button>
         </form>
       </div>
     </div>

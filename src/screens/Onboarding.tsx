@@ -29,8 +29,8 @@ export default function Onboarding() {
   const langs = type ? languageOptions(type, from) : [];
 
   const choose = (ty: Traveller['type']) => { setType(ty); if (ty === 'foreign') setLang('en'); };
-  // Picking a state or country offers that region's language (e.g. Gujarat -> Gujarati, Germany -> Deutsch).
-  const pickFrom = (v: string) => { setFrom(v); const extra = languageOptions(type!, v).filter((c) => c !== 'en' && c !== 'hi'); if (extra.length) setLang(extra[0]); };
+  // Picking a state or country offers that region's language in the options below (e.g. Gujarat -> Gujarati, Germany -> Deutsch).
+  const pickFrom = (v: string) => { setFrom(v); };
   const toggle = (th: Theme) => setInterests((x) => (x.includes(th) ? x.filter((y) => y !== th) : [...x, th]));
   const finish = () => {
     setTraveller({ type: type!, name: name.trim() || (type === 'foreign' ? 'Guest' : 'यात्री'), from, days, group, interests: interests.length ? interests : ['history'], firstTime });

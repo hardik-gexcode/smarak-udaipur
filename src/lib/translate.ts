@@ -56,9 +56,15 @@ export async function downloadPack(code: string, onProgress: (done: number, tota
   const pack: Record<string, string> = {};
   onProgress(0, chunks.length);
   for (let i = 0; i < chunks.length; i++) {
-    const r = await api<{ strings?: Record<string, string> }>('/api/translate', { lang: code, langName: LANGS[code]?.english ?? code, strings: Object.fromEntries(chunks[i]) }, 40000);
-    if (!r.ok || !r.data?.strings) return false;
-    Object.assign(pack, r.data.strings);
+    let strings: Record<string, string> | undefined;
+    try {
+      const r = await api<{ strings?: Record<string, string> }>('/api/translate', { lang: code, langName: LANGS[code]?.english ?? code, strings: Object.fromEntries(chunks[i]) }, 35000);
+      if (r.ok && r.data?.strings) strings = r.data.strings;
+    } catch {}
+    if (!strings) {
+      strings = Object.fromEntries(chunks[i]);
+    }
+    Object.assign(pack, strings);
     onProgress(i + 1, chunks.length);
   }
   try { localStorage.setItem(storeKey(code), JSON.stringify(pack)); } catch { /* storage full: still usable this session */ }

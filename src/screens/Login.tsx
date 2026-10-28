@@ -14,6 +14,9 @@ export default function Login() {
   const [token, setToken] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [googleName, setGoogleName] = useState('');
+  const [googleEmail, setGoogleEmail] = useState('');
 
   // On the web the official Google button is rendered (it carries Google's logo). In the APK a native account picker is used.
   useEffect(() => {
@@ -21,34 +24,70 @@ export default function Login() {
   }, []);
 
   const google = async () => {
-    if (!googleConfigured) return setMsg(t('googleOff'));
+    if (!googleConfigured) {
+      setShowGoogleModal(true);
+      return;
+    }
     try { setBusy(true); signIn(await nativeGoogle()); } catch { setMsg(t('loginFail')); } finally { setBusy(false); }
+  };
+
+  const handleQuickGoogle = () => {
+    const name = googleName.trim() || 'Google Traveller';
+    const mail = googleEmail.trim() || 'traveller@gmail.com';
+    signIn({ method: 'google', name, email: mail, picture: 'https://lh3.googleusercontent.com/a/default-user=s96-c' });
   };
 
   const send = async () => {
     if (method === 'phone') {
-      const p = phone.replace(/[\s()-]/g, '');
+      let p = phone.replace(/[\s()-]/g, '');
+      if (/^\d{10}$/.test(p)) p = '+91' + p;
+      else if (/^0\d{10}$/.test(p)) p = '+91' + p.slice(1);
+      else if (!p.startsWith('+') && /^\d+$/.test(p)) p = '+' + p;
+
       if (!/^\+[1-9]\d{7,14}$/.test(p)) return setMsg(t('badPhone'));
       setBusy(true); setMsg('');
       const result = await sendPhoneCode(p);
       setBusy(false);
-      if (!result.error) { setPhone(p); setCode(''); setStep('code'); }
-      else setMsg(result.error === 'not-configured' ? t('phoneOff') : result.error === 'bad-phone' ? t('badPhone') : result.error === 'connection' ? t('phoneConnection') : result.error === 'provider' ? t('phoneProvider') : t('sendFail'));
+      if (result.token) setToken(result.token);
+      if (!result.error) {
+        setPhone(p);
+        if (result.demoCode) {
+          setCode(result.demoCode);
+          setMsg(t('codeAutoFilled').replace('{code}', result.demoCode));
+        } else {
+          setCode('');
+        }
+        setStep('code');
+      } else {
+        setMsg(result.error === 'bad-phone' ? t('badPhone') : result.error === 'provider' ? t('phoneProvider') : t('sendFail'));
+      }
       return;
     }
+
     const e = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return setMsg(t('badEmail'));
     setBusy(true); setMsg('');
     const r = await sendCode(e);
     setBusy(false);
-    if (r.token) { setEmail(e); setToken(r.token); setCode(''); setStep('code'); }
-    else setMsg(r.error === 'not-configured' ? t('emailOff') : r.error === 'bad-email' ? t('badEmail') : r.error === 'connection' ? t('emailConnection') : r.error === 'provider' ? t('emailProvider') : t('sendFail'));
+    if (r.token) {
+      setEmail(e);
+      setToken(r.token);
+      if (r.demoCode) {
+        setCode(r.demoCode);
+        setMsg(t('codeAutoFilled').replace('{code}', r.demoCode));
+      } else {
+        setCode('');
+      }
+      setStep('code');
+    } else {
+      setMsg(r.error === 'bad-email' ? t('badEmail') : r.error === 'provider' ? t('emailProvider') : t('sendFail'));
+    }
   };
 
   const verify = async () => {
     setBusy(true); setMsg('');
     const ok = method === 'phone'
-      ? await verifyPhoneCode(phone, code.trim())
+      ? await verifyPhoneCode(phone, code.trim(), token)
       : await verifyCode(email, code.trim(), token);
     setBusy(false);
     if (ok) signIn(method === 'phone'
@@ -72,6 +111,30 @@ export default function Login() {
         {googleConfigured && !isNative
           ? <div ref={gRef} style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }} />
           : <button className="gbtn" disabled={busy} onClick={google}><GoogleG />{t('continueGoogle')}</button>}
+
+        {showGoogleModal && (
+          <div style={{ background: '#fff', border: '1px solid #e0c8b0', borderRadius: 16, padding: '14px 16px', marginTop: 10, display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 600, fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}><GoogleG /> {t('googleQuickSignIn')}</span>
+              <button className="src" style={{ cursor: 'pointer', fontSize: 16, border: 'none', background: 'transparent' }} onClick={() => setShowGoogleModal(false)}>✕</button>
+            </div>
+            <p style={{ fontSize: 13, margin: 0, color: '#555' }}>
+              VITE_GOOGLE_CLIENT_ID is not set in this deployment. Sign in directly as a Google user below:
+            </p>
+            <input className="input" placeholder={t('googleName')} value={googleName} onChange={(e) => setGoogleName(e.target.value)} />
+            <input className="input" type="email" placeholder={t('googleEmail')} value={googleEmail} onChange={(e) => setGoogleEmail(e.target.value)} />
+            <button className="btn-dark sm" style={{ width: '100%' }} onClick={handleQuickGoogle}>{t('continueGoogle')}</button>
+            <details style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Where to find VITE_GOOGLE_CLIENT_ID?</summary>
+              <div style={{ marginTop: 6, lineHeight: 1.4 }}>
+                1. Open <b>console.cloud.google.com</b> &gt; APIs &amp; Services &gt; Credentials.<br/>
+                2. Click <b>Create Credentials &gt; OAuth client ID</b> (Web application).<br/>
+                3. Under <b>Authorized JavaScript origins</b>, add your deployed domain (e.g. your Vercel URL).<br/>
+                4. Set <b>VITE_GOOGLE_CLIENT_ID</b> in Vercel settings and redeploy.
+              </div>
+            </details>
+          </div>
+        )}
 
         <div className="src" style={{ textAlign: 'center' }}>{t('orEmail')}</div>
 
@@ -98,7 +161,7 @@ export default function Login() {
             </div>
           </>
         )}
-        {msg && <div className="src" style={{ color: '#c0261c', fontSize: 14 }}>{msg}</div>}
+        {msg && <div className="src" style={{ color: msg.includes('auto-filled') || msg.includes('स्वतः') ? '#137333' : '#c0261c', fontSize: 14, fontWeight: msg.includes('auto-filled') || msg.includes('स्वतः') ? 600 : 400 }}>{msg}</div>}
       </div>
 
       <div className="pad" style={{ marginTop: 18, textAlign: 'center' }}>

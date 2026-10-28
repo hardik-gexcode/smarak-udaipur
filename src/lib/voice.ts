@@ -11,9 +11,33 @@ export const splitSentences = (t: string) =>
 
 export function stopSpeech() {
   token++;
-  audio?.pause();
-  audio = null;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (audio) {
+    try {
+      audio.pause();
+      audio.currentTime = 0;
+    } catch {}
+    audio = null;
+  }
+  if ('speechSynthesis' in window) {
+    try {
+      speechSynthesis.cancel();
+    } catch {}
+  }
+}
+
+/** Pre-unlocks audio element on user tap to satisfy iOS Safari & Android Chrome autoplay requirements */
+export function unlockAudio() {
+  try {
+    if (!audio) audio = new Audio();
+    // Silent 0.05-sec WAV to prime audio pipeline
+    audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+    audio.play().catch(() => {});
+  } catch {}
+  if ('speechSynthesis' in window) {
+    try {
+      speechSynthesis.resume();
+    } catch {}
+  }
 }
 
 /* ---------- Device voice selection, preferring Indian English and Hindi ---------- */
@@ -55,72 +79,94 @@ const cache = new Map<string, string>();
 async function cloud(text: string, lang: Lang): Promise<string | null> {
   const key = `${lang}|${gender()}|${text}`;
   if (cache.has(key)) return cache.get(key)!;
-  const r = await api<{ audio?: string }>('/api/tts', { text, lang, locale: localeOf(lang), gender: gender() }, 7000);
-  if (!r.ok || !r.data?.audio) return null;
-  const src = `data:audio/mp3;base64,${r.data.audio}`;
-  cache.set(key, src);
-  return src;
+  try {
+    const r = await api<{ audio?: string }>('/api/tts', { text, lang, locale: localeOf(lang), gender: gender() }, 7000);
+    if (r.ok && r.data?.audio) {
+      const src = `data:audio/mp3;base64,${r.data.audio}`;
+      cache.set(key, src);
+      return src;
+    }
+  } catch {}
+  // Direct client audio URL fallback
+  try {
+    const ttsLang = lang === 'hi' ? 'hi' : lang === 'en' ? 'en' : lang;
+    return `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(ttsLang)}&client=tw-ob&q=${encodeURIComponent(text.slice(0, 200))}`;
+  } catch {}
+  return null;
 }
 
 const play = (src: string) =>
   new Promise<boolean>((resolve) => {
-    audio = new Audio(src);
-    audio.onended = () => resolve(true);
-    audio.onerror = () => resolve(false);
-    audio.play().catch(() => resolve(false));
+    try {
+      if (!audio) audio = new Audio();
+      audio.src = src;
+      audio.onended = () => resolve(true);
+      audio.onerror = () => resolve(false);
+      const p = audio.play();
+      if (p) {
+        p.then(() => {}).catch(() => resolve(false));
+      }
+    } catch {
+      resolve(false);
+    }
   });
 
 function device(text: string, lang: Lang, voice?: SpeechSynthesisVoice) {
   return new Promise<void>((resolve) => {
-    const readTime = Math.max(1800, text.length * 55);
+    const readTime = Math.max(1600, text.length * 50);
     if (!('speechSynthesis' in window)) return void setTimeout(resolve, readTime);
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = voice?.lang ?? localeOf(lang);
-    if (voice) u.voice = voice;
-    u.rate = 0.95;
-    let started = false, done = false;
-    let hardStop: ReturnType<typeof setTimeout> | undefined;
-    const fin = () => { if (!done) { done = true; clearTimeout(watchdog); clearTimeout(hardStop); resolve(); } };
-    // If the engine never starts (no voice installed), keep captions moving at reading speed.
-    const watchdog = setTimeout(() => { if (!started) { speechSynthesis.cancel(); setTimeout(fin, readTime); } }, 2500);
-    hardStop = setTimeout(() => { speechSynthesis.cancel(); fin(); }, readTime * 2 + 5000);
-    u.onstart = () => { started = true; };
-    u.onend = fin;
-    u.onerror = fin;
-    speechSynthesis.resume();
-    speechSynthesis.speak(u);
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = voice?.lang ?? localeOf(lang);
+      if (voice) u.voice = voice;
+      u.rate = 0.95;
+      let started = false, done = false;
+      let hardStop: ReturnType<typeof setTimeout> | undefined;
+      const fin = () => { if (!done) { done = true; clearTimeout(watchdog); clearTimeout(hardStop); resolve(); } };
+      // Responsive watchdog: fail quickly if the device engine has no speech data for this language
+      const watchdog = setTimeout(() => { if (!started) { try { speechSynthesis.cancel(); } catch {} fin(); } }, 1200);
+      hardStop = setTimeout(() => { try { speechSynthesis.cancel(); } catch {} fin(); }, readTime + 3000);
+      u.onstart = () => { started = true; };
+      u.onend = fin;
+      u.onerror = fin;
+      speechSynthesis.resume();
+      speechSynthesis.speak(u);
+    } catch {
+      resolve();
+    }
   });
 }
 
 /** Speaks sentence by sentence with live captions, using cloud speech when available and device voices as fallback. */
 export async function speakSeq(sentences: string[], lang: Lang, onSentence: (i: number) => void, onDone: () => void) {
   stopSpeech();
+  unlockAudio();
   const mine = token;
-  // Mobile browsers often return an empty voice list briefly. Waiting for voiceschanged
-  // here also loses the tap's audio activation, so use the current list and speak now.
-  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const voice = pickVoice(lang, 'speechSynthesis' in window ? speechSynthesis.getVoices() : []);
+  const voices = 'speechSynthesis' in window ? await loadVoices() : [];
+  const voice = pickVoice(lang, voices);
   if (mine !== token) return;
+
   for (let i = 0; i < sentences.length; i++) {
     if (mine !== token) return;
     onSentence(i);
-    // Keep phone playback inside the click/tap that started narration. A cloud request
-    // before speech can outlive the browser's user-activation window and remain silent.
-    if (mobile) {
-      await device(sentences[i], lang, voice);
-      continue;
-    }
+
     let played = false;
-    if (apiBase !== null && (cloudRetryAfter.get(lang) ?? 0) <= Date.now() && navigator.onLine) {
+    // 1. Try cloud or free web audio stream first (runs on all devices, audio unlocked by tap)
+    if (navigator.onLine && (cloudRetryAfter.get(lang) ?? 0) <= Date.now()) {
       const src = await cloud(sentences[i], lang);
       if (mine !== token) return;
       if (src) {
         if (sentences[i + 1]) void cloud(sentences[i + 1], lang);
         played = await play(src);
         if (mine !== token) return;
-      } else cloudRetryAfter.set(lang, Date.now() + 30000);
+      }
+      if (!played) cloudRetryAfter.set(lang, Date.now() + 20000);
     }
-    if (!played) await device(sentences[i], lang, voice);
+
+    // 2. Fall back to on-device SpeechSynthesis
+    if (!played) {
+      await device(sentences[i], lang, voice);
+    }
   }
   if (mine === token) onDone();
 }
