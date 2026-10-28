@@ -245,6 +245,7 @@ export const SITES: Site[] = [
   {
     id: 'eklingji',
     area: 'nathdwara',
+    img: '/img/eklingji.png',
     themes: ['spiritual','history','art'],
     mapQ: 'Eklingji Temple Kailashpuri',
     name: { en: 'Eklingji Temple (Kailashpuri)', hi: 'एकलिंगजी मंदिर (कैलाशपुरी)' },
@@ -440,9 +441,11 @@ export interface Partner {
   badges?: L[];
   lat: number;
   lng: number;
+  mapQ?: string;
+  website?: string;
 }
 
-/** SAMPLE DATA: replace with verified partners before real-world use. */
+/** Demo rows are marked as samples; website-linked rows cite public business information, not a formal partnership. */
 export const PARTNERS: Partner[] = [
   { id: 'a1', name: 'Mewar Miniature Studio', nearSite: 'jagdish-temple', kind: 'artisan', craft: { en: 'Miniature painting', hi: 'लघु चित्रकला' }, lat: 24.5784, lng: 73.6829 },
   { id: 'a2', name: 'Lakeside Silver Workshop', nearSite: 'city-palace', kind: 'artisan', craft: { en: 'Silver jewellery', hi: 'चाँदी के गहने' }, lat: 24.5771, lng: 73.6842 },
@@ -453,6 +456,11 @@ export const PARTNERS: Partner[] = [
   { id: 's1', name: 'Lakeview Jharokha Stay', nearSite: 'bagore-ki-haveli', kind: 'stay', img: '/img/stay-lakeview.jpg', badges: [{ en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Plastic-free', hi: 'प्लास्टिक-मुक्त' }], lat: 24.5801, lng: 73.6808 },
   { id: 's2', name: 'Mural Haveli Suites', nearSite: 'city-palace', kind: 'stay', img: '/img/stay-mural.jpg', badges: [{ en: 'Buys from local artisans', hi: 'स्थानीय कारीगरों से खरीद' }, { en: 'Solar hot water', hi: 'सौर गर्म पानी' }], lat: 24.5769, lng: 73.6826 },
   { id: 's3', name: 'Terrace Lakeside Heritage Hotel', nearSite: 'jagdish-temple', kind: 'stay', img: '/img/stay-terrace.jpg', badges: [{ en: 'Farm-to-table', hi: 'खेत से थाली तक' }, { en: 'Refill water stations', hi: 'रीफ़िल पानी केंद्र' }], lat: 24.5792, lng: 73.6832 },
+  { id: 'a7', name: 'Pacific Art Udaipur', nearSite: 'bagore-ki-haveli', kind: 'artisan', craft: { en: 'Mewar miniature painting · workshops and classes', hi: 'मेवाड़ लघु चित्रकला · कार्यशालाएँ और कक्षाएँ' }, lat: 24.5830, lng: 73.6790, mapQ: 'Pacific Art Udaipur, 192 Naga Nagri, Outside Chandpole, Udaipur', website: 'https://www.pacificartudaipur.com/home' },
+  { id: 'a8', name: 'TAAP – The Artisans House', nearSite: 'saheliyon-ki-bari', kind: 'artisan', craft: { en: 'Hand-block-printed textiles and artisan-made home goods', hi: 'हाथ से छपे वस्त्र और कारीगरों द्वारा बने घरेलू सामान' }, lat: 24.6000, lng: 73.6800, mapQ: 'TAAP The Artisans House, 47 Krishna Complex, Bedla Road, Udaipur', website: 'https://taaptheartisanshouse.in/pages/contact-us' },
+  { id: 's4', name: 'Fateh Garh', nearSite: 'lake-palace', kind: 'stay', badges: [{ en: 'Solar and wind energy', hi: 'सौर और पवन ऊर्जा' }, { en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Recycled building materials', hi: 'पुनर्चक्रित निर्माण सामग्री' }], lat: 24.5753, lng: 73.6803, mapQ: 'Fateh Garh, Bujara, Sisarma Road, Udaipur', website: 'https://www.fatehcollection.com/fateh-garh-udaipur-resort/about-fateh-garh/our-goal.html' },
+  { id: 's5', name: 'The Mangal View Residency', nearSite: 'city-palace', kind: 'stay', badges: [{ en: 'Solar panels supply 30% of energy needs', hi: 'सौर पैनल से 30% ऊर्जा की ज़रूरत पूरी' }], lat: 24.5780, lng: 73.6820, mapQ: 'The Mangal View Residency, Sharma Colony, Brahmpuri, Udaipur', website: 'https://www.themangalview.com/' },
+  { id: 's6', name: 'Ramada by Wyndham Udaipur Resort and Spa', nearSite: 'fateh-sagar', kind: 'stay', badges: [{ en: 'Solar panels', hi: 'सौर पैनल' }, { en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Treated water reused for gardens', hi: 'उपचारित पानी का बगीचों में पुनः उपयोग' }], lat: 24.6045, lng: 73.6780, mapQ: 'Ramada by Wyndham Udaipur Resort and Spa, Rampura Circle, Kodiyat Main Road, Udaipur', website: 'https://www.ramadaudaipur.com/about' },
 ];
 
 // Missing translations fall back to English, so a half-translated language never shows blanks.

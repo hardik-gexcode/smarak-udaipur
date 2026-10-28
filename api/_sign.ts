@@ -21,4 +21,5 @@ export const checkToken = (token: string, email: string, code: string) => {
 export const cors = (res: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 };

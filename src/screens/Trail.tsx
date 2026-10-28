@@ -35,7 +35,9 @@ export default function Trail() {
             <div className="actions" style={{ marginTop: 4 }}>
               <button className="btn-dark sm" onClick={() => openMap(p)}><Icon n="nav" size={18} />{t('direction')}</button>
               <button className="btn-round" style={{ width: 48, height: 48 }} aria-label="Site" onClick={() => go({ name: 'site', id: near.id })}><Icon n="arrow" size={20} /></button>
-              <span className="src" style={{ marginLeft: 'auto' }}>{t('sample')}</span>
+              {p.website
+                ? <a className="src" href={p.website} target="_blank" rel="noreferrer">{t('website')}</a>
+                : <span className="src" style={{ marginLeft: 'auto' }}>{t('sample')}</span>}
             </div>
           </div>
         );

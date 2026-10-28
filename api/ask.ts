@@ -3,6 +3,7 @@
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -19,15 +20,18 @@ export default async function handler(req: any, res: any) {
     `Site: ${String(site).slice(0, 80)}\nFacts: ${String(context).slice(0, 1500)}\nVisitor question: ${q}`;
 
   try {
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 300, temperature: 0.4 } }),
-    });
-    const j: any = await r.json();
-    const text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('').trim();
-    return text ? res.status(200).json({ text }) : res.status(502).json({ error: 'empty response' });
+    const models = [...new Set([process.env.GEMINI_MODEL, 'gemini-3.8-flash'].filter(Boolean))] as string[];
+    for (const model of models) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 300, temperature: 0.4 } }),
+      });
+      const j: any = await r.json();
+      const text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('').trim();
+      if (r.ok && text) return res.status(200).json({ text });
+    }
+    return res.status(502).json({ error: 'model unavailable' });
   } catch {
     return res.status(502).json({ error: 'upstream failure' });
   }

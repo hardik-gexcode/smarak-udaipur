@@ -4,6 +4,7 @@ import { useApp } from '../lib/app';
 import { Chip, Header, Icon, LangToggle } from '../ui';
 import { passId } from './Home';
 import { cloudAvailable, gender, loadVoices, saveVoice, savedVoice, setGender, speakSeq, voicesFor } from '../lib/voice';
+import { nativeName } from '../lib/langs';
 
 export default function Passport() {
   const { t, lang, passport, setPassport, xp, levelKey, online, user, traveller, setTraveller, signOut } = useApp();
@@ -11,8 +12,13 @@ export default function Passport() {
   const [, force] = useState(0);
   useEffect(() => { loadVoices().then(setVoices); }, []);
   const en = voicesFor('en', voices), hi = voicesFor('hi', voices);
-  const pickVoice = (l: 'en' | 'hi', v: string) => { saveVoice(l, v); force((x) => x + 1); };
-  const test = (l: 'en' | 'hi') => speakSeq([l === 'en' ? 'Namaste! Welcome to Udaipur, the City of Lakes.' : 'नमस्ते! झीलों की नगरी उदयपुर में आपका स्वागत है।'], l, () => {}, () => {});
+  const pickVoice = (l: string, v: string) => { saveVoice(l, v); force((x) => x + 1); };
+  const test = (l: string) => {
+    const sample = l === 'en' ? 'Namaste! Welcome to Udaipur, the City of Lakes.'
+      : l === 'hi' ? 'नमस्ते! झीलों की नगरी उदयपुर में आपका स्वागत है.'
+      : SITES.find((s) => s.story[l])?.story[l].split(/(?<=[.।!?])\s/)[0] ?? 'Namaste! Welcome to Udaipur.';
+    speakSeq([sample], l, () => {}, () => {});
+  };
   const got = SITES.filter((s) => passport.stamps[s.id]);
 
   return (
@@ -64,6 +70,19 @@ export default function Passport() {
             <button className="btn-dark sm" style={{ justifySelf: 'start' }} onClick={() => test(l)}><Icon n="speaker" size={18} />{t('testVoice')}</button>
           </div>
         ))}
+        {!['en', 'hi'].includes(lang) && (() => {
+          const list = voicesFor(lang, voices);
+          return <div style={{ display: 'grid', gap: 8 }}>
+            <div className="meta">{nativeName(lang)}</div>
+            {list.length > 0
+              ? <select className="input" value={savedVoice(lang)} onChange={(e) => pickVoice(lang, e.target.value)}>
+                  <option value="">{t('autoVoice')}</option>
+                  {list.map((v) => <option key={v.name} value={v.name}>{v.name}</option>)}
+                </select>
+              : <div className="src">{t('regionalVoiceNote')}</div>}
+            <button className="btn-dark sm" style={{ justifySelf: 'start' }} onClick={() => test(lang)}><Icon n="speaker" size={18} />{t('testVoice')}</button>
+          </div>;
+        })()}
         {cloudAvailable && (
           <div className="seg" style={{ justifySelf: 'start' }}>
             <button className={gender() === 'f' ? 'on' : ''} onClick={() => { setGender('f'); force((x) => x + 1); }}>{t('female')}</button>

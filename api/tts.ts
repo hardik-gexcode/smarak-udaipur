@@ -1,4 +1,4 @@
-// Optional: consistent Indian-accent voices (en-IN / hi-IN) from Google Cloud Text-to-Speech, key kept on the server.
+// Speech for en-IN / hi-IN and supported selected-language voices from Google Cloud Text-to-Speech; key stays on the server.
 // Enable the "Cloud Text-to-Speech API" in Google Cloud, create an API key, set GOOGLE_TTS_API_KEY in Vercel.
 const VOICES: Record<string, Record<string, string>> = {
   en: { f: 'en-IN-Neural2-A', m: 'en-IN-Neural2-B' },
@@ -8,6 +8,7 @@ const VOICES: Record<string, Record<string, string>> = {
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const key = process.env.GOOGLE_TTS_API_KEY;

@@ -17,6 +17,8 @@ export const LANGS: Record<string, LangInfo> = Object.fromEntries([
   L('ml', 'മലയാളം', 'Malayalam', 'ml-IN'), L('pa', 'ਪੰਜਾਬੀ', 'Punjabi', 'pa-IN'), L('or', 'ଓଡ଼ିଆ', 'Odia', 'or-IN'),
   L('ne', 'नेपाली', 'Nepali', 'ne-NP'), L('as', 'অসমীয়া', 'Assamese', 'as-IN'), L('ur', 'اردو', 'Urdu', 'ur-IN', true), L('si', 'සිංහල', 'Sinhala', 'si-LK'),
   L('kok', 'कोंकणी', 'Konkani', 'kok-IN'),
+  L('af', 'Afrikaans', 'Afrikaans', 'af-ZA'), L('cy', 'Cymraeg', 'Welsh', 'cy-GB'), L('ga', 'Gaeilge', 'Irish', 'ga-IE'),
+  L('mi', 'Māori', 'Māori', 'mi-NZ'), L('nb', 'Norsk bokmål', 'Norwegian Bokmål', 'nb-NO'), L('mai', 'मैथिली', 'Maithili', 'mai-IN'),
 ].map((x) => [x.code, x]));
 
 export const localeOf = (code: string) => LANGS[code]?.locale ?? 'en-IN';
@@ -27,17 +29,22 @@ export const COUNTRY_LANGS: Record<string, string[]> = {
   Switzerland: ['de', 'fr', 'it'], Austria: ['de'], Sweden: ['sv'], Denmark: ['da'], Finland: ['fi'], Poland: ['pl'], Russia: ['ru'], Turkey: ['tr'],
   Israel: ['he'], 'United Arab Emirates': ['ar'], 'Saudi Arabia': ['ar'], Japan: ['ja'], 'South Korea': ['ko'], China: ['zh'], Singapore: ['zh'],
   Malaysia: ['ms'], Thailand: ['th'], Indonesia: ['id'], 'Sri Lanka': ['si'], Nepal: ['ne'], Bangladesh: ['bn'], Brazil: ['pt'], Argentina: ['es'], Mexico: ['es'],
+  'United States': ['es'], 'United Kingdom': ['cy'], Australia: [], 'New Zealand': ['mi'], Ireland: ['ga'], Norway: ['nb'], 'South Africa': ['af'],
 };
 
 export const STATE_LANGS: Record<string, string[]> = {
   Gujarat: ['gu'], Maharashtra: ['mr'], 'West Bengal': ['bn'], 'Tamil Nadu': ['ta'], Telangana: ['te'], 'Andhra Pradesh': ['te'],
   Karnataka: ['kn'], Kerala: ['ml'], Punjab: ['pa'], Odisha: ['or'], Assam: ['as'], 'Jammu & Kashmir': ['ur'], Chandigarh: ['pa'],
-  Goa: ['kok'], Sikkim: ['ne'],
+  Goa: ['kok'], Sikkim: ['ne'], Bihar: ['mai'], 'Dadra & Nagar Haveli and Daman & Diu': ['gu'], Lakshadweep: ['ml'], Puducherry: ['ta'],
+  Haryana: ['pa'], 'Himachal Pradesh': ['pa'], Jharkhand: ['bn', 'or'], Tripura: ['bn'], 'Uttar Pradesh': ['ur'],
+  'Andaman & Nicobar': ['bn', 'ta', 'te'], Delhi: ['pa', 'ur'], Ladakh: ['ur'],
 };
 
 /** Extra languages offered next to English and Hindi, based on the traveller's country or home state. */
 export const regionalLangs = (t: Pick<Traveller, 'type' | 'from'> | null | undefined): string[] =>
-  !t ? [] : (t.type === 'foreign' ? COUNTRY_LANGS : STATE_LANGS)[t.from] ?? [];
+  !t ? [] : t.type === 'foreign' && t.from === 'Other'
+    ? Object.keys(LANGS).filter((code) => code !== 'en')
+    : (t.type === 'foreign' ? COUNTRY_LANGS : STATE_LANGS)[t.from] ?? [];
 
 /** Languages to offer for a traveller type and place: Indians get Hindi + English + their state's language; visitors get English + their country's language. */
 export const languageOptions = (type: Traveller['type'], from: string): string[] =>

@@ -3,6 +3,7 @@
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const key = process.env.GEMINI_API_KEY;
@@ -20,18 +21,24 @@ export default async function handler(req: any, res: any) {
     `Return ONLY the JSON object.\n${JSON.stringify(strings)}`;
 
   try {
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 } }),
-    });
-    const j: any = await r.json();
-    const text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('') ?? '';
-    const out = JSON.parse(text);
-    const clean: Record<string, string> = {};
-    for (const [k] of entries) if (typeof out[k] === 'string') clean[k] = out[k];
-    return Object.keys(clean).length ? res.status(200).json({ strings: clean }) : res.status(502).json({ error: 'empty' });
+    const models = [...new Set([process.env.GEMINI_MODEL, 'gemini-3.8-flash'].filter(Boolean))] as string[];
+    for (const model of models) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 } }),
+      });
+      if (!r.ok) continue;
+      const j: any = await r.json();
+      const text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('') ?? '';
+      try {
+        const out = JSON.parse(text);
+        const clean: Record<string, string> = {};
+        for (const [k] of entries) if (typeof out[k] === 'string') clean[k] = out[k];
+        if (Object.keys(clean).length) return res.status(200).json({ strings: clean });
+      } catch { /* try the stable fallback model */ }
+    }
+    return res.status(502).json({ error: 'model unavailable' });
   } catch {
     return res.status(502).json({ error: 'upstream failure' });
   }

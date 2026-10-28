@@ -4,7 +4,7 @@ import { localeOf } from './langs';
 
 let token = 0;
 let audio: HTMLAudioElement | null = null;
-let cloudOk = true;
+const cloudRetryAfter = new Map<string, number>();
 
 export const splitSentences = (t: string) =>
   (t.match(/[^.।!?]+[.।!?]*/g) ?? [t]).map((s) => s.trim()).filter(Boolean);
@@ -16,7 +16,7 @@ export function stopSpeech() {
   if ('speechSynthesis' in window) speechSynthesis.cancel();
 }
 
-/* ---------- Indian-accent voice selection (en-IN, hi-IN) ---------- */
+/* ---------- Device voice selection, preferring Indian English and Hindi ---------- */
 const norm = (l: string) => l.toLowerCase().replace('_', '-');
 const PREFERRED = /(neerja|heera|ravi|prabhat|swara|madhur|kalpana|hemant|lekha|rishi|veena|google|natural|online)/i;
 
@@ -50,7 +50,7 @@ function pickVoice(lang: Lang, all: SpeechSynthesisVoice[]) {
   return list.find((v) => v.name === savedVoice(lang)) ?? list[0] ?? (lang === 'en' ? all.find((v) => norm(v.lang).startsWith('en')) : undefined);
 }
 
-/* ---------- Optional cloud voices (Google Cloud TTS en-IN / hi-IN Neural2) via /api/tts ---------- */
+/* ---------- Cloud speech for Indian English, Hindi, and supported selected languages ---------- */
 const cache = new Map<string, string>();
 async function cloud(text: string, lang: Lang): Promise<string | null> {
   const key = `${lang}|${gender()}|${text}`;
@@ -79,9 +79,11 @@ function device(text: string, lang: Lang, voice?: SpeechSynthesisVoice) {
     if (voice) u.voice = voice;
     u.rate = 0.95;
     let started = false, done = false;
-    const fin = () => { if (!done) { done = true; clearTimeout(watchdog); resolve(); } };
+    let hardStop: ReturnType<typeof setTimeout> | undefined;
+    const fin = () => { if (!done) { done = true; clearTimeout(watchdog); clearTimeout(hardStop); resolve(); } };
     // If the engine never starts (no voice installed), keep captions moving at reading speed.
     const watchdog = setTimeout(() => { if (!started) { speechSynthesis.cancel(); setTimeout(fin, readTime); } }, 2500);
+    hardStop = setTimeout(() => { speechSynthesis.cancel(); fin(); }, readTime * 2 + 5000);
     u.onstart = () => { started = true; };
     u.onend = fin;
     u.onerror = fin;
@@ -90,7 +92,7 @@ function device(text: string, lang: Lang, voice?: SpeechSynthesisVoice) {
   });
 }
 
-/** Speaks sentence by sentence with live captions. Cloud Indian voice when configured and online, else on-device en-IN / hi-IN. */
+/** Speaks sentence by sentence with live captions, using cloud speech when available and device voices as fallback. */
 export async function speakSeq(sentences: string[], lang: Lang, onSentence: (i: number) => void, onDone: () => void) {
   stopSpeech();
   const mine = token;
@@ -100,14 +102,14 @@ export async function speakSeq(sentences: string[], lang: Lang, onSentence: (i: 
     if (mine !== token) return;
     onSentence(i);
     let played = false;
-    if (apiBase !== null && cloudOk && navigator.onLine) {
+    if (apiBase !== null && (cloudRetryAfter.get(lang) ?? 0) <= Date.now() && navigator.onLine) {
       const src = await cloud(sentences[i], lang);
       if (mine !== token) return;
       if (src) {
         if (sentences[i + 1]) void cloud(sentences[i + 1], lang);
         played = await play(src);
         if (mine !== token) return;
-      } else cloudOk = false;
+      } else cloudRetryAfter.set(lang, Date.now() + 30000);
     }
     if (!played) await device(sentences[i], lang, voice);
   }
