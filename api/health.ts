@@ -14,7 +14,7 @@ export default function handler(req: any, res: any) {
     google: !!process.env.VITE_GOOGLE_CLIENT_ID,
     email,
     phone,
-    translationAndAiGuide: !!process.env.GEMINI_API_KEY,
+    translation: !!process.env.GEMINI_API_KEY,
     cloudSpeech: !!process.env.GOOGLE_TTS_API_KEY,
   });
 }
