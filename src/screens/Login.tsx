@@ -33,7 +33,7 @@ export default function Login() {
       const result = await sendPhoneCode(p);
       setBusy(false);
       if (!result.error) { setPhone(p); setCode(''); setStep('code'); }
-      else setMsg(result.error === 'not-configured' ? t('phoneOff') : result.error === 'bad-phone' ? t('badPhone') : t('sendFail'));
+      else setMsg(result.error === 'not-configured' ? t('phoneOff') : result.error === 'bad-phone' ? t('badPhone') : result.error === 'connection' ? t('phoneConnection') : result.error === 'provider' ? t('phoneProvider') : t('sendFail'));
       return;
     }
     const e = email.trim().toLowerCase();
@@ -42,7 +42,7 @@ export default function Login() {
     const r = await sendCode(e);
     setBusy(false);
     if (r.token) { setEmail(e); setToken(r.token); setCode(''); setStep('code'); }
-    else setMsg(r.error === 'not-configured' ? t('emailOff') : r.error === 'bad-email' ? t('badEmail') : t('sendFail'));
+    else setMsg(r.error === 'not-configured' ? t('emailOff') : r.error === 'bad-email' ? t('badEmail') : r.error === 'connection' ? t('emailConnection') : r.error === 'provider' ? t('emailProvider') : t('sendFail'));
   };
 
   const verify = async () => {

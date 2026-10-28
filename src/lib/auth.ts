@@ -49,7 +49,7 @@ export async function nativeGoogle(): Promise<User> {
 }
 
 /* ---------- Email verification code (always sent by real email) ---------- */
-export type SendError = 'not-configured' | 'failed' | 'bad-email';
+export type SendError = 'not-configured' | 'failed' | 'connection' | 'provider' | 'bad-email';
 
 /** Asks the server to email a 6-digit code. Resolves with a signed token that the verify step needs. */
 export async function sendCode(email: string): Promise<{ token?: string; error?: SendError }> {
@@ -58,6 +58,8 @@ export async function sendCode(email: string): Promise<{ token?: string; error?:
   if (r.ok && !r.data) return { error: 'not-configured' }; // a static host answered with a web page, not the API
   if (r.status === 400) return { error: 'bad-email' };
   if (r.status === 503 || r.status === 404 || r.status === 405) return { error: 'not-configured' };
+  if (r.status === 0) return { error: 'connection' };
+  if (r.status === 502) return { error: 'provider' };
   return { error: 'failed' };
 }
 
@@ -66,13 +68,15 @@ export async function verifyCode(email: string, code: string, token: string): Pr
   return r.ok && !!r.data?.ok;
 }
 
-export type PhoneError = 'not-configured' | 'failed' | 'bad-phone';
+export type PhoneError = 'not-configured' | 'failed' | 'connection' | 'provider' | 'bad-phone';
 
 export async function sendPhoneCode(phone: string): Promise<{ error?: PhoneError }> {
   const r = await api('/api/send-phone-code', { phone }, 15000);
   if (r.ok) return {};
   if (r.status === 400) return { error: 'bad-phone' };
   if (r.status === 404 || r.status === 405 || r.status === 503) return { error: 'not-configured' };
+  if (r.status === 0) return { error: 'connection' };
+  if (r.status === 502) return { error: 'provider' };
   return { error: 'failed' };
 }
 

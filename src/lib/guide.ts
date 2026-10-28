@@ -6,14 +6,17 @@ import { LANGS } from './langs';
 import { api } from './api';
 
 /** Offline-first Q&A: retrieval over the on-device heritage pack, optionally escalated to Gemini when online. */
-export async function ask(site: Site, q: string, lang: Lang): Promise<{ text: string; source: 'gemini' | 'offline' }> {
+export async function ask(site: Site, q: string, lang: Lang): Promise<{ text: string; source: 'gemini' | 'offline' | 'unconfigured' | 'unavailable' }> {
   const l = /[\u0900-\u097F]/.test(q) ? 'hi' : lang;
   if (navigator.onLine) {
     const r = await api<{ text?: string }>('/api/ask', {
       q, lang: l, langName: LANGS[l]?.english ?? 'English', site: site.name.en,
       context: `${site.built.en}. ${site.story.en} ${site.legacy.en} ${site.tip.en}`,
-    }, 9000);
+    }, 25000);
     if (r.ok && r.data?.text) return { text: r.data.text, source: 'gemini' };
+    const offline = offlineAnswer(site, q, lang);
+    if (r.status === 503 || r.status === 404 || r.status === 405) return { text: offline, source: 'unconfigured' };
+    return { text: offline, source: 'unavailable' };
   }
   return { text: offlineAnswer(site, q, lang), source: 'offline' };
 }

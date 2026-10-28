@@ -35,7 +35,7 @@ export default function ARView({ id }: { id: string }) {
   const [speaking, setSpeaking] = useState(false);
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
-  const [source, setSource] = useState<'gemini' | 'offline' | null>(null);
+  const [source, setSource] = useState<'gemini' | 'offline' | 'unconfigured' | 'unavailable' | null>(null);
   const [listening, setListening] = useState(false);
 
   const setMode = (m: Mode) => { modeRef.current = m; setModeState(m); };
@@ -255,10 +255,11 @@ export default function ARView({ id }: { id: string }) {
           {busy ? t('thinking') : lines.map((s, i) => (
             <span key={i} style={active === i ? { background: '#ffd9c4', borderRadius: 6, padding: '1px 3px' } : undefined}>{s} </span>
           ))}
-          {source && !busy && <div className="src">{source === 'gemini' ? t('geminiNote') : t('offlineNote')}</div>}
+          {source && !busy && <div className="src">{source === 'gemini' ? t('geminiNote') : source === 'unconfigured' ? t('aiNeedsConfig') : source === 'unavailable' ? t('aiUnavailable') : t('offlineNote')}</div>}
         </div>
         <form style={{ display: 'flex', gap: 10, alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <input ref={input} className="input" value={q} placeholder={t('askPh')} onChange={(e) => setQ(e.target.value)} />
+          {!speaking && lines.length > 0 && <button type="button" className="btn-round" aria-label="Listen" onClick={() => say(lines.join(' '))}><Icon n="speaker" /></button>}
           {canListen && <button type="button" className={`btn-round ${listening ? 'dark' : ''}`} aria-label="Speak" onClick={mic}><Icon n="mic" /></button>}
           {speaking
             ? <button type="button" className="btn-round dark" aria-label="Stop" onClick={stop}><Icon n="stop" /></button>

@@ -96,11 +96,20 @@ function device(text: string, lang: Lang, voice?: SpeechSynthesisVoice) {
 export async function speakSeq(sentences: string[], lang: Lang, onSentence: (i: number) => void, onDone: () => void) {
   stopSpeech();
   const mine = token;
-  const voice = pickVoice(lang, await loadVoices());
+  // Mobile browsers often return an empty voice list briefly. Waiting for voiceschanged
+  // here also loses the tap's audio activation, so use the current list and speak now.
+  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const voice = pickVoice(lang, 'speechSynthesis' in window ? speechSynthesis.getVoices() : []);
   if (mine !== token) return;
   for (let i = 0; i < sentences.length; i++) {
     if (mine !== token) return;
     onSentence(i);
+    // Keep phone playback inside the click/tap that started narration. A cloud request
+    // before speech can outlive the browser's user-activation window and remain silent.
+    if (mobile) {
+      await device(sentences[i], lang, voice);
+      continue;
+    }
     let played = false;
     if (apiBase !== null && (cloudRetryAfter.get(lang) ?? 0) <= Date.now() && navigator.onLine) {
       const src = await cloud(sentences[i], lang);
