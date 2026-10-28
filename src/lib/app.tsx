@@ -4,7 +4,7 @@ import { SITES, siteById } from '../data/sites';
 import { Key, tr } from './i18n';
 import { stopSpeech } from './voice';
 import { LANGS } from './langs';
-import { downloadPack, isBuiltIn, loadCachedPack } from './translate';
+import { loadCachedPack } from './translate';
 import type { User } from './auth';
 import type { Traveller } from './plan';
 
@@ -17,8 +17,6 @@ interface Passport { name: string; stamps: Record<string, number>; demo: boolean
 interface Ctx {
   lang: Lang;
   setLang: (l: Lang) => void;
-  busyLang: { code: string; pct: number } | null;
-  langError: boolean;
   t: (k: Key) => string;
   screen: Screen;
   go: (s: Screen) => void;
@@ -50,8 +48,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('smarak.lang') || 'en';
     return loadCachedPack(saved) ? saved : 'en';
   });
-  const [busyLang, setBusyLang] = useState<{ code: string; pct: number } | null>(null);
-  const [langError, setLangError] = useState(false);
   const [stack, setStack] = useState<Screen[]>([{ name: 'home' }]);
   const [passport, setPassportState] = useState<Passport>(() => load('smarak.passport', { name: '', stamps: {}, demo: true }));
   const [user, setUserState] = useState<User | null>(() => { try { return JSON.parse(localStorage.getItem('smarak.user') || 'null'); } catch { return null; } });
@@ -68,15 +64,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { document.documentElement.lang = lang; document.documentElement.dir = LANGS[lang]?.rtl ? 'rtl' : 'ltr'; }, [lang]);
-  const setLang = async (l: Lang) => {
+  const setLang = (l: Lang) => {
+    if (!loadCachedPack(l)) return;
     stopSpeech();
-    setLangError(false);
-    if (!isBuiltIn(l) && !loadCachedPack(l)) {
-      setBusyLang({ code: l, pct: 0 });
-      const ok = await downloadPack(l, (d, n) => setBusyLang({ code: l, pct: Math.round((d / n) * 100) }));
-      setBusyLang(null);
-      if (!ok) { setLangError(true); return; }
-    }
     localStorage.setItem('smarak.lang', l);
     setLangState(l);
   };
@@ -111,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const levelKey: Key = xp >= 75 ? 'guardian' : xp >= 25 ? 'explorer' : 'traveller';
 
   const value: Ctx = {
-    lang, setLang, busyLang, langError, t: (k) => tr(k, lang), screen: stack[stack.length - 1], go, back, isRoot: stack.length === 1,
+    lang, setLang, t: (k) => tr(k, lang), screen: stack[stack.length - 1], go, back, isRoot: stack.length === 1,
     passport, setPassport, user, signIn, signOut, traveller, setTraveller, xp, levelKey, online, tick, bump: () => setTick((x) => x + 1),
   };
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;

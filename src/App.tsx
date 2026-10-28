@@ -1,6 +1,5 @@
 import { AppProvider, useApp } from './lib/app';
 import { Icon } from './ui';
-import { nativeName } from './lib/langs';
 import Home from './screens/Home';
 import Explore from './screens/Explore';
 import SiteScreen from './screens/Site';
@@ -15,17 +14,14 @@ const TABS = [
 ] as const;
 
 function Shell() {
-  const { screen, go, t, user, traveller, busyLang, langError } = useApp();
-  const overlay = (<>{busyLang && <div className="overlay"><div><img src="/logo.png" width={96} height={96} alt="" style={{ borderRadius: 24 }} /><h3 style={{ marginTop: 14 }}>{t('translating')} {nativeName(busyLang.code)}…</h3><div className="bar2"><i style={{ width: `${Math.max(6, busyLang.pct)}%` }} /></div></div></div>}{langError && <div className="toast" style={{ zIndex: 120, top: 20, bottom: 'auto' }}>{t('translateFail')}</div>}</>);
-  if (!user) return <div className="phone">{overlay}<Login /></div>;
-  if (!traveller) return <div className="phone">{overlay}<Onboarding /></div>;
+  const { screen, go, t, user, traveller } = useApp();
+  if (!user) return <div className="phone"><Login /></div>;
+  if (!traveller) return <div className="phone"><Onboarding /></div>;
   const activeTab = screen.name === 'site' ? 'explore' : screen.name;
   const key = 'id' in screen ? `${screen.name}:${screen.id}` : screen.name;
 
   return (
     <div className="phone">
-      {busyLang && <div className="overlay"><div><img src="/logo.png" width={96} height={96} alt="" style={{ borderRadius: 24 }} /><h3 style={{ marginTop: 14 }}>{t('translating')} {nativeName(busyLang.code)}…</h3><div className="bar2"><i style={{ width: `${Math.max(6, busyLang.pct)}%` }} /></div></div></div>}
-      {langError && <div className="toast" style={{ zIndex: 120, top: 20, bottom: 'auto' }}>{t('translateFail')}</div>}
       <div key={key} style={{ height: '100%' }}>
         {screen.name === 'home' && <Home />}
         {screen.name === 'explore' && <Explore />}

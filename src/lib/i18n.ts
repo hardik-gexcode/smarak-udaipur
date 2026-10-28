@@ -1,4 +1,5 @@
 import type { Lang } from '../data/sites';
+import { OFFLINE_UI_PACKS } from './offlinePacks';
 
 export const D = {
   home: ['Home', 'होम'], explore: ['Explore', 'खोजें'], trail: ['Trail', 'ट्रेल'], passport: ['Passport', 'पासपोर्ट'],
@@ -73,7 +74,6 @@ export const D = {
   ansQuiet: ['{name} is very quiet right now, and may be closed.', 'अभी {name} में बहुत शांति है, शायद बंद हो।'],
   ansCraft: ['Nearby is {p}, known for {c}. Buying directly sends your spend to the maker.', 'पास में {p} है, जहाँ {c} का काम होता है। इन्हें सीधे खरीदने से कमाई कारीगर तक पहुँचती है।'],
   emailOff: ['Email sign-in is not configured. Set AUTH_SECRET and SMTP_USER plus SMTP_PASS (Gmail App Password) or RESEND_API_KEY in Vercel, redeploy, then check /api/health.', 'ईमेल साइन-इन कॉन्फ़िगर नहीं है। Vercel में AUTH_SECRET और SMTP_USER के साथ SMTP_PASS (Gmail App Password) या RESEND_API_KEY जोड़ें, redeploy करें और /api/health देखें।'],
-  translating: ['Translating the app into', 'ऐप का अनुवाद हो रहा है:'], translateFail: ['Could not finish the regional translation. Check your internet connection and try again; no API key is needed.', 'क्षेत्रीय अनुवाद पूरा नहीं हो सका। इंटरनेट कनेक्शन जाँचकर फिर प्रयास करें; किसी API key की ज़रूरत नहीं है।'],
   emailConnection: ['Could not reach the login server. Check the deployed site connection and /api/health.', 'लॉगिन सर्वर तक पहुँचा नहीं जा सका। deployed साइट का कनेक्शन और /api/health जाँचें।'],
   emailProvider: ['The email provider rejected the request. Check SMTP_USER and SMTP_PASS (Gmail App Password) or RESEND_API_KEY in Vercel.', 'ईमेल प्रदाता ने अनुरोध अस्वीकार किया। Vercel में SMTP_USER और SMTP_PASS (Gmail App Password) या RESEND_API_KEY जाँचें।'],
   phoneConnection: ['Could not reach the login server. Check the deployed site connection and /api/health.', 'लॉगिन सर्वर तक पहुँचा नहीं जा सका। deployed साइट का कनेक्शन और /api/health जाँचें।'],
@@ -89,8 +89,8 @@ export const D = {
 
 export type Key = keyof typeof D;
 
-/** Translated packs for languages other than English/Hindi, filled by lib/translate.ts and cached on the device. */
-export const packs: Record<string, Record<string, string>> = {};
+/** Bundled UI translations. There are no runtime translation requests. */
+export const packs: Record<string, Record<string, string>> = OFFLINE_UI_PACKS;
 
 export const tr = (k: Key, lang: Lang): string =>
   lang === 'en' ? D[k][0] : lang === 'hi' ? D[k][1] : packs[lang]?.[`u:${k}`] ?? D[k][0];

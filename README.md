@@ -77,7 +77,7 @@ Alternative: Resend (`RESEND_API_KEY`, `AUTH_SECRET`, and a verified domain in `
 
 **3. Phone verification codes.** Create a Twilio Verify service and set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_VERIFY_SERVICE_SID` in your local `.env` and Vercel's Environment Variables. Phone numbers must include their country calling code in E.164 format (for example, `+919876543210`). Twilio sends and verifies the code; SMARAK does not store the code. SMS charges and country delivery rules depend on your Twilio account.
 
-**4. Regional text translation.** No API key is needed. The Vercel `/api/translate` function requests translations from Google's public translation endpoint, then caches a complete language pack on the device for offline use. The first download needs an internet connection. This public endpoint may rate-limit requests.
+**4. Regional language UI.** Bundled regional-language labels are included in the app and switch instantly without a translation API or network request. Monument descriptions are authored in English and Hindi; other regional-language views retain the source English for those longer descriptions.
 
 **5. Cloud narration in regional languages.** Enable *Cloud Text-to-Speech API* in Google Cloud, create an API key, and set `GOOGLE_TTS_API_KEY` in Vercel. This lets the app speak in the selected language when the device has no matching voice. Redeploy after adding the variable. Without it, speech depends on voices installed on the traveller's device.
 
@@ -91,7 +91,7 @@ After deployment, open `/api/health` on your site. It returns only true/false re
 - Indian travellers: choosing a home state offers its language (including Gujarati, Marathi, Bengali, Tamil, Telugu, Kannada, Malayalam, Punjabi, Odia, Assamese, Urdu, Konkani, Nepali, and Maithili where mapped).
 - International visitors: choosing a country offers its language (French, German, Spanish, Italian, Japanese, Korean, Chinese, Arabic, Hebrew, Russian and more, see `src/lib/langs.ts`).
 - The language button (globe, top right) always lists English, Hindi and the traveller's regional language(s). Right-to-left languages flip the layout.
-- Ask Guide answers from the built-in heritage pack without a cloud AI request. Narration uses the phone's voice for the selected language if one is installed. Regional text translation is keyless and needs internet for its first download.
+- Ask Guide answers from the built-in heritage pack without a cloud AI request. Narration uses the phone's voice for the selected language if one is installed. Bundled UI labels work offline; long monument descriptions are currently available in English and Hindi.
 - `/api/health` shows which Vercel integrations have their required environment variables set. It returns readiness flags only, never credentials.
 
 ## 3D models: what is real and what is not
@@ -108,14 +108,7 @@ Your logo is used as the app icon, adaptive icon, splash and login screen. After
 
 ## Regional translation
 
-```bash
-npm i -g vercel && vercel
-# Translation uses the Vercel /api/translate function; no translation key is required.
-# For cloud Indian voices also add GOOGLE_TTS_API_KEY (Cloud Text-to-Speech API enabled).
-# Then set VITE_API_URL=https://<your-project>.vercel.app in .env and rebuild
-```
-
-The translation service may rate-limit requests; completed language packs are cached on-device.
+Regional UI phrase packs are included in the app bundle. Choosing a supported language changes the interface immediately and works offline; it does not call a translation server or require an API key. Coverage is strongest for Home and trip setup. Any phrase without a reviewed translation, including longer monument descriptions, uses its English source text. English and Hindi have the complete authored content.
 
 ## Put it on GitHub
 

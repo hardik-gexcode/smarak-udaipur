@@ -14,11 +14,9 @@ export default function handler(req: any, res: any) {
     google: !!process.env.VITE_GOOGLE_CLIENT_ID,
     email,
     phone,
-    translation: true,
-    translationProvider: 'keyless-online',
+    translation: 'offline-bundled',
     cloudSpeech: !!process.env.GOOGLE_TTS_API_KEY,
     status: 'operational',
     instantAuthFallback: true,
-    freeTranslationFallback: true,
   });
 }
