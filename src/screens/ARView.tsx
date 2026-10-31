@@ -8,6 +8,8 @@ import { pref } from '../lib/maps';
 import { greeting } from '../lib/time';
 import { canListen, listen, speakSeq, splitSentences, stopSpeech } from '../lib/voice';
 import { Icon, LangToggle } from '../ui';
+import LiveVoiceGuide from './LiveVoiceGuide';
+import { LANGS } from '../lib/langs';
 
 type Chapter = 'story' | 'legacy' | 'tip';
 type Mode = '3d' | 'ar';
@@ -37,6 +39,7 @@ export default function ARView({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [source, setSource] = useState<'gemini' | 'offline' | 'unconfigured' | 'unavailable' | null>(null);
   const [listening, setListening] = useState(false);
+  const [liveVoiceOpen, setLiveVoiceOpen] = useState(false);
 
   const setMode = (m: Mode) => { modeRef.current = m; setModeState(m); };
   useEffect(() => { stereoRef.current = stereo; }, [stereo]);
@@ -227,7 +230,7 @@ export default function ARView({ id }: { id: string }) {
   const suggestions: [string, string][] = [[t('qWho'), 'q1'], [t('qBest'), 'q2'], [t('qSpecial'), 'q3'], [t('qCraft'), 'q4']];
 
   return (
-    <div className={`ar ${stereo ? 'stereo' : ''}`}>
+    <div className={`ar ${stereo ? 'stereo' : ''} ${liveVoiceOpen ? 'voice-open' : ''}`}>
       <video ref={video} playsInline muted autoPlay style={{ display: showVideo ? 'block' : 'none' }} />
       <div ref={host} style={{ position: 'absolute', inset: 0 }} />
       <div className="divider" />
@@ -265,6 +268,7 @@ export default function ARView({ id }: { id: string }) {
           ))}
           {source && !busy && <div className="src">{source === 'gemini' ? t('geminiNote') : source === 'unconfigured' ? t('aiNeedsConfig') : source === 'unavailable' ? t('aiUnavailable') : t('offlineNote')}</div>}
         </div>
+        <button className="btn-dark sm live-guide-trigger" type="button" onClick={() => setLiveVoiceOpen(true)}><Icon n="mic" size={19} />Talk with the live AI guide</button>
         <form style={{ display: 'flex', gap: 10, alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <input ref={input} className="input" value={q} placeholder={t('askPh')} onChange={(e) => setQ(e.target.value)} />
           {speaking ? (
@@ -276,6 +280,15 @@ export default function ARView({ id }: { id: string }) {
           <button type="submit" className="btn-round dark" disabled={busy || !q.trim()} aria-label="Send"><Icon n="send" /></button>
         </form>
       </div>
+      {liveVoiceOpen && <LiveVoiceGuide
+        key={`${site.id}-${lang}`}
+        place={site.name[lang]}
+        language={LANGS[lang]?.english ?? lang}
+        context={lang === 'hi'
+          ? `${site.built.hi}. ${site.story.hi} ${site.legacy.hi} ${site.tip.hi}`
+          : `${site.built.en}. ${site.story.en} ${site.legacy.en} ${site.tip.en}`}
+        onClose={() => setLiveVoiceOpen(false)}
+      />}
     </div>
   );
 }

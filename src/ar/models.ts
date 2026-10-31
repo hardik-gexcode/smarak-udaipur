@@ -417,11 +417,122 @@ function haldighati() {
   return g;
 }
 
+// Distinct procedural landmark models for the Udaipur additions. These are
+// recognizable scene reconstructions; surveyed CAD scans can replace them via GLB.
+function picholaLake() {
+  const g = new THREE.Group();
+  g.add(water(6.3, 0, -0.15, 0));
+  // City waterfront and palace silhouette on the eastern shore.
+  g.add(box(5.4, 0.35, 1.05, 0, 0, -4.7, SAND), box(4.9, 2.5, 0.9, 0, 0.35, -5.1, SANDSTONE));
+  g.add(box(5.8, 0.24, 1.15, 0, 2.65, -5.1, SAND), crenel(-2.8, 2.8, 2.88, -5.1, SAND));
+  for (const x of [-2.0, -0.7, 0.7, 2.0]) g.add(arch(0.52, 1.15, x, 1.1, -4.62, DARK));
+  g.add(dome(0.68, -1.9, 2.82, -5.1, SAND), dome(0.78, 0, 2.84, -5.1, SAND), dome(0.68, 1.9, 2.82, -5.1, SAND));
+  // Two island silhouettes and a small white lake palace.
+  g.add(cyl(1.35, 1.55, 0.3, -2.2, -0.05, 0.3, SAND, 36), box(2.1, 0.7, 1.8, -2.2, 0.25, 0.3, MARBLE));
+  g.add(box(2.2, 0.18, 1.9, -2.2, 0.95, 0.3, MARBLE), dome(0.48, -2.2, 1.13, 0.3, MARBLE));
+  g.add(cyl(1.15, 1.25, 0.28, 2.6, -0.05, 1.5, SAND, 32), box(1.5, 0.6, 1.3, 2.6, 0.22, 1.5, SAND));
+  for (const x of [-2.8, 2.3]) for (let i = 0; i < 5; i++) g.add(box(0.55, 0.14, 0.22, x, 0.03 + i * 0.12, 3.8 + i * 0.35, SAND));
+  return g;
+}
+
+function bahubaliHills() {
+  const g = new THREE.Group();
+  g.add(water(6.5, 0, -0.2, 1.3));
+  g.add(hillMound(1.5, 3.3, 2.1, -4.0, -1.9, GREEN), hillMound(1.25, 3.2, 2.2, 4.0, -2.0, HILL));
+  g.add(hillMound(1.25, 3.5, 2.5, -3.1, 2.7, LEAF), hillMound(1.0, 2.8, 2.2, 3.5, 3.0, GREEN));
+  g.add(hillMound(0.72, 2.5, 3.4, 0.25, 0.15, mat(0x64734a, 1)));
+  // The narrow rocky lookout ridge and footpath over the lake.
+  const ridge = box(0.9, 0.35, 6.2, 0.15, 2.65, 0.2, ROCK); ridge.rotation.y = 0.18; g.add(ridge);
+  for (let i = 0; i < 7; i++) { const t = i / 6; g.add(tree(-4.5 + t * 1.6, -1.9 + t * 0.55, 0.2 + t * 0.2, 0.55)); }
+  return g;
+}
+
+function raytaHills() {
+  const g = new THREE.Group();
+  const meadow = mat(0x6c9256, 1), ridge = mat(0x66804e, 1);
+  g.add(hillMound(1.1, 3.3, 2.5, -4.3, -2.2, meadow), hillMound(1.2, 3.5, 2.8, 4.2, -2.0, ridge));
+  g.add(hillMound(1.15, 3.4, 2.6, -3.4, 2.6, ridge), hillMound(1.0, 3.0, 2.45, 3.4, 2.5, meadow));
+  g.add(hillMound(0.85, 2.7, 2.9, 0, 0.4, HILL));
+  const roadMat = mat(0x716957, 1);
+  const points: V3[] = [[-5, 0.75, 2.7],[-3.4, 1.05, 1.8],[-1.8, 1.35, 2.4],[0, 1.6, 1.2],[1.8, 1.85, 1.6],[3.5, 2.0, 0.2],[5, 2.15, -0.2]];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1], len = Math.hypot(b[0] - a[0], b[2] - a[2]);
+    const seg = new THREE.Mesh(new THREE.BoxGeometry(len, 0.09, 0.42), roadMat);
+    seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+    seg.rotation.y = -Math.atan2(b[2] - a[2], b[0] - a[0]); g.add(seg);
+  }
+  for (const [x,z] of [[-4,-2],[4,-3],[-4,3],[4,3]] as [number,number][]) g.add(tree(x,z,0.3,0.7));
+  return g;
+}
+
+function gangaurGhat() {
+  const g = new THREE.Group();
+  g.add(water(6.2, 0, -0.25, 1));
+  // Broad stepped landing falling toward the water, with the old-city gateway behind.
+  for (let i = 0; i < 9; i++) g.add(box(6.0 - i * 0.35, 0.18, 0.42, 0, i * 0.18, 4.1 - i * 0.46, SAND));
+  g.add(box(5.0, 3.3, 0.65, 0, 1.4, -3.9, SAND), box(5.5, 0.35, 0.95, 0, 4.65, -3.9, SAND));
+  for (const x of [-1.75, 0, 1.75]) g.add(arch(1.35, 2.2, x, 1.45, -3.55, DARK));
+  g.add(box(0.75, 4.0, 0.75, -2.6, 1.4, -3.9, SAND), box(0.75, 4.0, 0.75, 2.6, 1.4, -3.9, SAND));
+  for (const x of [-2.3, 2.3]) g.add(dome(0.48, x, 4.8, -3.9, SAND));
+  return g;
+}
+
+function shilpgram() {
+  const g = new THREE.Group();
+  const thatch = mat(0xa86c38, 1), wall = mat(0xc99861, 1), festival = mat(0xc84632);
+  g.add(box(8, 0.3, 6, 0, -0.08, 0, mat(0x8a7855, 1)));
+  for (const [x,z,s] of [[-2.7,-1.7,1],[0,-1.8,0.85],[2.7,-1.6,1.05],[-1.6,1.6,0.9],[1.5,1.7,0.8]] as [number,number,number][]) {
+    g.add(box(1.55*s, 1.15*s, 1.4*s, x, 0.2, z, wall));
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(1.15*s, 1.0*s, 4), thatch); roof.position.set(x, 1.65*s, z); roof.rotation.y = Math.PI/4; g.add(roof);
+    g.add(box(0.45*s, 0.76*s, 0.08, x, 0.24, z + 0.72*s, DARK));
+  }
+  g.add(box(5.8, 0.42, 0.45, 0, 2.6, -3.0, festival), box(0.45, 2.6, 0.45, -2.7, 0, -3.0, festival), box(0.45, 2.6, 0.45, 2.7, 0, -3.0, festival));
+  for (const x of [-2.0,-1.1,0,1.1,2.0]) g.add(cyl(0.035,0.035,0.55,x,2.9,-3.0,GOLD,6));
+  return g;
+}
+
+function jagMandirIsland() {
+  const g = new THREE.Group();
+  g.add(water(6.5, 0, -0.2, 0), cyl(3.25, 3.45, 0.52, 0, 0, 0, SAND, 48));
+  g.add(box(5.8, 0.35, 4.1, 0, 0.52, 0, MARBLE), box(5.1, 1.85, 3.6, 0, 0.85, -0.15, MARBLE));
+  g.add(box(5.7, 0.23, 4.1, 0, 2.7, -0.15, MARBLE));
+  for (const x of [-2.0,-1.0,0,1.0,2.0]) g.add(arch(0.68, 1.2, x, 1.0, 1.68, DARK));
+  for (const x of [-2.15,0,2.15]) g.add(dome(0.62,x,2.92,-0.1,MARBLE));
+  g.add(box(2.1, 1.1, 1.45, 0, 2.9, -1.3, MARBLE), dome(0.86,0,4.0,-1.3,MARBLE));
+  g.add(elephant(-2.85,0.55,0.8), elephant(2.85,0.55,0.8));
+  return g;
+}
+
+function motiMagri() {
+  const g = new THREE.Group();
+  g.add(hillMound(1.8, 5.2, 3.2, 0, 0, GREEN), water(5.5, 0, -0.4, -3.2));
+  for (let i = 0; i < 9; i++) g.add(box(2.25 + i * 0.27, 0.16, 0.48, 0, i * 0.28, 4.5 - i * 0.5, SAND));
+  g.add(box(3.0, 0.28, 2.4, 0, 3.2, 0.1, MARBLE), box(2.35, 1.05, 1.85, 0, 3.48, 0.1, MARBLE), horse(0,4.55,0.1,1.4));
+  g.add(box(3.7, 0.25, 2.8, 0, 3.0, 0.1, SAND));
+  for (const x of [-3.8,3.8]) g.add(tree(x,0.5,0.2,0.85));
+  return g;
+}
+
+function karniMataHillTemple() {
+  const g = new THREE.Group();
+  g.add(hillMound(2.1,5.1,3.1,0,0,GREEN));
+  for (let i = 0; i < 8; i++) g.add(box(2.8,0.16,0.48,0,i*0.28,4.2-i*0.48,SAND));
+  g.add(box(3.6,0.5,3.1,0,3.1,0,STONE), box(2.7,1.8,2.25,0,3.6,0,STONE));
+  for (const x of [-0.8,0.8]) g.add(cyl(0.11,0.13,1.2,x,3.7,1.16,STONE,12));
+  g.add(shikhara(2.8,0.82,0,5.4,-0.15,STONE), dome(0.5,-1.15,5.2,0.1,STONE), dome(0.5,1.15,5.2,0.1,STONE));
+  // Cable and gondola indicate the hill ropeway without pretending to be a surveyed installation.
+  const cable = cyl(0.018,0.018,7.5,-2.4,5.2,-1.2,GOLD,6); cable.rotation.z = Math.PI/2.7; g.add(cable);
+  g.add(box(0.78,0.45,0.48,2.3,4.15,-1.2,mat(0xc64d36)), cyl(0.035,0.035,0.65,2.3,4.55,-1.2,GOLD,8));
+  return g;
+}
+
 const BUILDERS: Record<string, () => THREE.Group> = {
   'city-palace': cityPalace, 'jagdish-temple': jagdishTemple, 'lake-palace': lakePalace, 'saheliyon-ki-bari': saheliyon,
   'bagore-ki-haveli': bagoreHaveli, sajjangarh, 'ahar-cenotaphs': aharCenotaphs, 'fateh-sagar': fatehSagar,
   shrinathji: shrinathjiGate, 'statue-of-belief': statueOfBelief, eklingji, 'nagda-sas-bahu': sasBahu,
   'vijay-stambh': vijayStambh, 'chittorgarh-fort': chittorgarhFort, kumbhalgarh, ranakpur, haldighati,
+  'lake-pichola': picholaLake, 'bahubali-hills': bahubaliHills, 'rayta-hills': raytaHills, 'gangaur-ghat': gangaurGhat,
+  shilpgram, 'jag-mandir': jagMandirIsland, 'moti-magri': motiMagri, 'karni-mata-udaipur': karniMataHillTemple,
 };
 
 /** Fit a model into a ~6-8 unit box, resting on y=0 and centred. */

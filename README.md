@@ -102,6 +102,10 @@ Each monument now has its own hand-built model following its real silhouette (Ci
 
 Photos live in `public/img` and are picked up by setting `img` on the site in `src/data/sites.ts`. Attached photos were added for Lake Pichola, Bahubali Hills, Rayta Hills, Gangaur Ghat, Shilpgram, Jag Mandir, Moti Magri and Karni Mata Udaipur. The Lake Pichola page also has a second attached gallery photo.
 
+## Live voice guide
+
+The AR/3D guide has an optional live speech-to-speech conversation. Add `OPENAI_API_KEY` as a server-side Vercel environment variable (never `VITE_OPENAI_API_KEY`), then redeploy. The browser receives a short-lived Realtime credential from `/api/realtime-token`; the standard key remains on the server. HTTPS and microphone permission are required. API usage is metered. Without this variable, the existing on-device guide continues to work.
+
 ## Logo and app icon
 
 Your logo is used as the app icon, adaptive icon, splash and login screen. After `npm run android:add`, run `npm run assets` once to generate all Android icon and splash sizes from `assets/`.
@@ -120,13 +124,14 @@ git branch -M main && git remote add origin https://github.com/<you>/smarak-udai
 ## Project layout
 
 ```
-src/data/sites.ts      Content pack: 17 sites across Mewar (Udaipur, Nathdwara corridor, Kumbhalgarh, Chittorgarh) (EN + HI), artisans, stays. Add a monument = add one object.
+src/data/sites.ts      Content pack: Mewar heritage sites (EN + HI), artisans, stays. Add a monument = add one object.
 src/lib/crowd.ts       Crowd engine: density, best hour, nudge, check-ins
 src/lib/guide.ts       Offline Q&A over the heritage pack
 src/lib/voice.ts       Regional TTS with captions, voice input, installed-voice fallback
-src/ar/models.ts       Procedural 3D models (swap for glTF scans later)
+src/ar/models.ts       Distinct procedural 3D landmark scenes; optional scanned GLB override at public/models/<site-id>.glb
 src/screens/*          Home, Explore, Site, Trail, Passport, ARView
-api/ask.ts             Disabled endpoint; Ask Guide stays offline
+api/ask.ts             Optional Gemini text answers for Ask Guide
+api/realtime-token.ts  Server-minted short-lived credential for live voice sessions
 api/tts.ts             Optional cloud Indian voices
 api/send-code.ts, verify-code.ts   Email verification codes (stateless, signed)
 api/send-phone-code.ts, verify-phone-code.ts   Twilio Verify SMS codes

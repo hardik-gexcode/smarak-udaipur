@@ -22,7 +22,8 @@ export const passId = (name: string) => {
 };
 
 export default function Home() {
-  const { t, lang, go, passport, traveller, xp, levelKey } = useApp();
+  const { t, lang, go, passport, traveller, xp, levelKey, tick } = useApp();
+  void tick; // refresh the time-of-day crowd estimate every minute
   const [showMascotIntro, setShowMascotIntro] = useState(shouldPlayMascotIntro);
   useEffect(() => {
     if (!showMascotIntro) return;
@@ -87,6 +88,22 @@ export default function Home() {
           <button className="btn-dark sm" onClick={() => openExplore('quiet')}>{t('seeQuiet')}</button>
         </div>
       </div>
+
+      <section className="home-crowd-map" aria-label="Estimated crowd heat map">
+        <div className="crowd-map-heading"><div><h2>Crowd heat map</h2><small>Time-based estimate · {clock(UDAIPUR_TZ)} IST</small></div><button className="pill" onClick={() => go({ name: 'explore' })}>All places</button></div>
+        <div className="crowd-map-legend"><span><i className="low" />Low</span><span><i className="mid" />Moderate</span><span><i className="high" />High</span></div>
+        <div className="crowd-map-grid">
+          {SITES.map((site) => {
+            const crowd = density(site);
+            const level = levelOf(crowd);
+            const band = level === 'quiet' ? 'low' : level === 'busy' ? 'mid' : 'high';
+            return <button key={site.id} className={`crowd-tile ${band}`} onClick={() => go({ name: 'site', id: site.id })}>
+              <i className="crowd-dot" /><span>{site.name[lang]}</span><b>{crowd}%</b>
+            </button>;
+          })}
+        </div>
+        <div className="src">Modelled from each place’s typical hourly pattern; live sensor counts are not available.</div>
+      </section>
 
       <h2 className="sect">{t('services')}</h2>
       <div className="pills">
