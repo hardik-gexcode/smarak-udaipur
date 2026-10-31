@@ -8,6 +8,7 @@ import { buildPlan } from '../lib/plan';
 import { UDAIPUR_TZ, clock, differsFromUdaipur, greeting, timeTip, zoneParts } from '../lib/time';
 import { splitSentences } from '../lib/voice';
 import { Chip, Icon, LangToggle, Photo } from '../ui';
+import { latestTravelBadge } from '../lib/badges';
 
 const mascotIntroKey = 'smarak.mascotIntroPlayed';
 const shouldPlayMascotIntro = () => {
@@ -26,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     if (!showMascotIntro) return;
     try { sessionStorage.setItem(mascotIntroKey, '1'); } catch { /* animate for this visit */ }
-    const timer = window.setTimeout(() => setShowMascotIntro(false), 1450);
+    const timer = window.setTimeout(() => setShowMascotIntro(false), 2100);
     return () => window.clearTimeout(timer);
   }, [showMascotIntro]);
   const hot = SITES.filter((s) => s.area === 'udaipur' && s.hotspot);
@@ -43,6 +44,7 @@ export default function Home() {
   const first = (traveller?.name || passport.name || t('traveller')).split(' ')[0];
   const plan = traveller ? buildPlan(traveller) : [];
   const foreign = traveller?.type === 'foreign';
+  const flexBadge = latestTravelBadge(xp);
 
   const openExplore = (filter: string) => { pref.set('filter', filter); go({ name: 'explore' }); };
   const openTrail = (tab: string) => { pref.set('trail', tab); go({ name: 'trail' }); };
@@ -132,6 +134,7 @@ export default function Home() {
       <h2 className="sect">{t('ecard')}</h2>
       <button className="ecard" style={{ display: 'block', width: 'calc(100% - 44px)', textAlign: 'left' }} onClick={() => go({ name: 'passport' })}>
         <div className="id">{passId(passport.name)}</div>
+        {flexBadge && <div className="ecard-badge"><span>{flexBadge.icon}</span>{lang === 'hi' ? flexBadge.hindi : flexBadge.title}</div>}
         <div className="who">
           <div className="av">{(first || 'S')[0].toUpperCase()}</div>
           <div><div className="nm">{passport.name || first}</div><div className="lv">{t(levelKey)}</div></div>
@@ -150,7 +153,12 @@ export default function Home() {
           <button className="btn-round" aria-label="AR" onClick={() => openAr(false)}><Icon n="cube" /></button>
         </div>
       </div>
-      {showMascotIntro && <div className="mascot-intro" aria-hidden="true"><img src="/namaste-mascot.png" alt="" /></div>}
+      {showMascotIntro && (
+        <div className="mascot-intro" aria-label="Khamma Ghani. Namaste, welcome to Mewar.">
+          <img src="/namaste-mascot.png" alt="" />
+          <div className="mascot-intro-copy"><b>खम्मा घणी</b><span>नमस्ते · मेवाड़ में आपका स्वागत है</span><small>WELCOME TO MEWAR</small></div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ export interface Site {
   kind: Kind;
   area: Area; // day-trip cluster used by the planner
   img?: string; // bundled photo in public/img (optional; a drawn cover is used if missing)
+  gallery?: string[];
   themes: Theme[];
   mapQ?: string; // search text for directions when coordinates are only approximate
   lat: number; // approximate
@@ -434,6 +435,70 @@ export const SITES: Site[] = [
     },
     profile: curve([17.5, 2, 0.45], [11, 2.5, 0.15]),
   },
+  {
+    id: 'lake-pichola', area: 'udaipur', img: '/img/lake-pichola.png', gallery: ['/img/lake-pichola-steps.png'], themes: ['nature','photo','history'], mapQ: 'Lake Pichola Udaipur',
+    name: { en: 'Lake Pichola', hi: 'पिछोला झील' }, tag: { en: 'Lake & Ghats', hi: 'झील और घाट' }, kind: 'lake', lat: 24.5758, lng: 73.6798, hotspot: true, hue: ['#607f9b','#e6b8a0'],
+    built: { en: '14th century · expanded by Maharana Udai Singh II', hi: '14वीं सदी · महाराणा उदय सिंह द्वितीय ने विस्तार कराया' },
+    story: { en: 'Lake Pichola is an artificial freshwater lake created in 1362 and later enlarged when Maharana Udai Singh II founded Udaipur. Ghats, palaces and islands line its shores, giving the old city its unmistakable waterfront.', hi: 'पिछोला झील 1362 में बनाई गई कृत्रिम मीठे पानी की झील है। उदयपुर बसाने के बाद महाराणा उदय सिंह द्वितीय ने इसका विस्तार कराया। इसके किनारे घाट, महल और द्वीप हैं, जो पुराने शहर को खास झील-किनारा दृश्य देते हैं।' },
+    legacy: { en: 'Boat routes connect the city waterfront with Jag Mandir and views of Jag Niwas. The lake remains part of Udaipur’s living water landscape.', hi: 'नावें शहर के घाटों से जग मंदिर तक जाती हैं और जग निवास के सुंदर दृश्य दिखाती हैं। यह झील आज भी उदयपुर के जीवंत जल-परिदृश्य का हिस्सा है।' },
+    tip: { en: 'Choose an official boat jetty and check the last departure before sunset. Do not throw anything into the lake.', hi: 'अधिकृत नाव-घाट से नाव लें और सूर्यास्त से पहले आख़िरी नाव का समय जाँचें। झील में कचरा न डालें।' }, profile: curve([10,2,0.35],[18,2,0.8]),
+  },
+  {
+    id: 'bahubali-hills', area: 'udaipur', img: '/img/bahubali-hills.png', themes: ['nature','photo'], mapQ: 'Bahubali Hills Badi Lake Udaipur',
+    name: { en: 'Bahubali Hills', hi: 'बाहुबली हिल्स' }, tag: { en: 'Badi Lake Viewpoint', hi: 'बड़ी झील का दृश्य-बिंदु' }, kind: 'hill', lat: 24.6708, lng: 73.6297, hotspot: false, hue: ['#426b54','#a9c6a4'],
+    built: { en: 'Aravalli viewpoint · Badi Lake', hi: 'अरावली दृश्य-बिंदु · बड़ी झील' },
+    story: { en: 'A narrow ridge above Badi Lake creates the dramatic viewpoint known as Bahubali Hills. The walk rewards visitors with broad views over the lake and the folds of the Aravalli hills.', hi: 'बड़ी झील के ऊपर एक सँकरी पहाड़ी धार बाहुबली हिल्स का प्रसिद्ध दृश्य-बिंदु बनाती है। यहाँ तक पैदल पहुँचने पर झील और अरावली की पहाड़ियों के विस्तृत नज़ारे मिलते हैं।' },
+    legacy: { en: 'The rocky ridge and quiet lake landscape are a favourite for sunrise and landscape photography. The path is natural and uneven.', hi: 'चट्टानी धार और शांत झील का दृश्य सूर्योदय तथा प्रकृति-फ़ोटोग्राफ़ी के लिए लोकप्रिय है। रास्ता प्राकृतिक और ऊबड़-खाबड़ है।' },
+    tip: { en: 'Wear grippy shoes, carry water, and avoid the exposed ridge in strong wind or rain. Leave no litter.', hi: 'अच्छी पकड़ वाले जूते पहनें, पानी साथ रखें और तेज़ हवा या बारिश में खुली पहाड़ी धार पर न जाएँ। कचरा न छोड़ें।' }, profile: curve([7,1.5,0.35],[17,2,0.35]),
+  },
+  {
+    id: 'rayta-hills', area: 'udaipur', img: '/img/rayta-hills.png', themes: ['nature','photo'], mapQ: 'Rayta Hills Udaipur',
+    name: { en: 'Rayta Hills', hi: 'रायता हिल्स' }, tag: { en: 'Aravalli Drive', hi: 'अरावली का पहाड़ी रास्ता' }, kind: 'hill', lat: 24.495, lng: 73.590, hotspot: false, hue: ['#67845b','#d8c79c'],
+    built: { en: 'Aravalli range · Udaipur district', hi: 'अरावली पर्वतमाला · उदयपुर ज़िला' },
+    story: { en: 'Rayta is a green Aravalli hill landscape known for its winding road, open ridgelines and seasonal monsoon colour. The route is a scenic rural drive rather than a developed monument.', hi: 'रायता अरावली का हरा पहाड़ी इलाक़ा है, जो घुमावदार सड़क, खुली पहाड़ियों और मानसून में हरियाली के लिए जाना जाता है। यह विकसित स्मारक नहीं, बल्कि सुंदर ग्रामीण रास्ता है।' },
+    legacy: { en: 'Small villages and grazing land sit among the folds of the hills. Please respect local access, farms and roadside communities.', hi: 'पहाड़ियों के बीच छोटे गाँव और चरागाह हैं। स्थानीय रास्तों, खेतों और सड़क किनारे रहने वाले समुदायों का सम्मान करें।' },
+    tip: { en: 'Check road and weather conditions before setting out; avoid stopping on blind bends and carry drinking water.', hi: 'निकलने से पहले सड़क और मौसम की स्थिति जाँचें। अंधे मोड़ों पर न रुकें और पीने का पानी साथ रखें।' }, profile: curve([8,2,0.25],[16,2,0.25]),
+  },
+  {
+    id: 'gangaur-ghat', area: 'udaipur', img: '/img/gangaur-ghat.png', themes: ['history','photo','spiritual'], mapQ: 'Gangaur Ghat Udaipur',
+    name: { en: 'Gangaur Ghat', hi: 'गणगौर घाट' }, tag: { en: 'Historic Waterfront', hi: 'ऐतिहासिक झील-किनारा' }, kind: 'lake', lat: 24.5791, lng: 73.6812, hotspot: true, hue: ['#b77e64','#ecd2ad'],
+    built: { en: 'Old City · Lake Pichola waterfront', hi: 'पुराना शहर · पिछोला झील का किनारा' },
+    story: { en: 'Gangaur Ghat is one of the old city’s best-known steps to Lake Pichola. Its gateways and broad stone stairs frame the water and remain a gathering place for residents, visitors and festival processions.', hi: 'गणगौर घाट पुराने शहर की पिछोला झील तक जाने वाली प्रसिद्ध सीढ़ियों में से एक है। इसके द्वार और चौड़ी पत्थर की सीढ़ियाँ झील का सुंदर दृश्य बनाती हैं। यहाँ स्थानीय लोग, यात्री और उत्सव की शोभायात्राएँ जुटती हैं।' },
+    legacy: { en: 'The ghat is closely associated with Gangaur celebrations and the rhythms of everyday life by the lake. Nearby Bagore-ki-Haveli overlooks the waterfront.', hi: 'यह घाट गणगौर उत्सव और झील किनारे के रोज़मर्रा के जीवन से जुड़ा है। पास की बागोर की हवेली झील-किनारे को देखती है।' },
+    tip: { en: 'Visit respectfully, especially during worship or ceremonies. Keep steps clear and never leave offerings or litter in the water.', hi: 'विशेषकर पूजा या समारोह के समय सम्मानपूर्वक आएँ। सीढ़ियाँ खाली रखें और जल में पूजा-सामग्री या कचरा न छोड़ें।' }, profile: curve([9,1.5,0.4],[18,2,0.75]),
+  },
+  {
+    id: 'shilpgram', area: 'udaipur', img: '/img/shilpgram.png', themes: ['art','history'], mapQ: 'Shilpgram Udaipur',
+    name: { en: 'Shilpgram & Crafts Fair', hi: 'शिल्पग्राम और शिल्प मेला' }, tag: { en: 'Rural Arts Complex', hi: 'ग्रामीण कला परिसर' }, kind: 'garden', lat: 24.6075, lng: 73.6334, hotspot: false, hue: ['#a76935','#e4bc73'],
+    built: { en: '1989 · West Zone Cultural Centre', hi: '1989 · पश्चिम क्षेत्र सांस्कृतिक केंद्र' },
+    story: { en: 'Shilpgram is a rural arts and crafts complex on Udaipur’s western edge. Its village-style huts and open spaces introduce visitors to regional architecture, handmade arts, music and dance.', hi: 'शिल्पग्राम उदयपुर के पश्चिमी किनारे पर बना ग्रामीण कला और शिल्प परिसर है। गाँव जैसी झोपड़ियाँ और खुले मैदान क्षेत्रीय वास्तुकला, हस्तकला, संगीत और नृत्य से परिचित कराते हैं।' },
+    legacy: { en: 'The annual Shilpgram Utsav brings craftspeople, performers and visitors together. Dates and participating stalls change each year; the fair is seasonal.', hi: 'वार्षिक शिल्पग्राम उत्सव कारीगरों, कलाकारों और यात्रियों को एक साथ लाता है। मेले की तारीख़ें और दुकानें हर साल बदलती हैं; यह मौसमी आयोजन है।' },
+    tip: { en: 'Check the official calendar before planning around the fair. Ask makers before photographing them and buy directly when possible.', hi: 'मेले के लिए यात्रा तय करने से पहले आधिकारिक कैलेंडर देखें। कारीगरों की तस्वीर लेने से पहले पूछें और संभव हो तो उनसे सीधे खरीदें।' }, profile: curve([11,2,0.3],[17,2,0.6]),
+  },
+  {
+    id: 'jag-mandir', area: 'udaipur', img: '/img/jag-mandir.png', themes: ['history','photo'], mapQ: 'Jag Mandir Island Palace Udaipur',
+    name: { en: 'Jag Mandir', hi: 'जग मंदिर' }, tag: { en: 'Island Palace', hi: 'द्वीप महल' }, kind: 'island', lat: 24.5727, lng: 73.6796, hotspot: false, hue: ['#7695a7','#e5d3b5'],
+    built: { en: '16th–17th centuries · Lake Pichola', hi: '16वीं–17वीं सदी · पिछोला झील' },
+    story: { en: 'Jag Mandir is a palace complex on an island in Lake Pichola. Construction began under Maharana Amar Singh and continued under Maharana Karan Singh and Maharana Jagat Singh I, creating marble pavilions and courtyards above the water.', hi: 'जग मंदिर पिछोला झील के एक द्वीप पर बना महल परिसर है। इसका निर्माण महाराणा अमर सिंह के समय शुरू हुआ और महाराणा करण सिंह तथा महाराणा जगत सिंह प्रथम के समय आगे बढ़ा। इसके संगमरमर के मंडप और आँगन पानी के ऊपर बने हैं।' },
+    legacy: { en: 'Its Gul Mahal is associated with the Mughal prince Khurram, later Emperor Shah Jahan, who is said to have stayed here during a period of refuge.', hi: 'इसका गुल महल मुग़ल राजकुमार ख़ुर्रम, बाद के सम्राट शाहजहाँ, से जुड़ा है। कहा जाता है कि शरण के समय वे यहाँ ठहरे थे।' },
+    tip: { en: 'Reach the island by an authorised boat service and confirm operating hours and entry conditions before departure.', hi: 'द्वीप तक अधिकृत नाव सेवा से जाएँ और निकलने से पहले नाव का समय तथा प्रवेश नियम जाँच लें।' }, profile: curve([11,2,0.35],[16,2,0.5]),
+  },
+  {
+    id: 'moti-magri', area: 'udaipur', img: '/img/moti-magri.png', themes: ['history','photo'], mapQ: 'Moti Magri Maharana Pratap Memorial Udaipur',
+    name: { en: 'Moti Magri (Pratap Memorial)', hi: 'मोती मगरी (प्रताप स्मारक)' }, tag: { en: 'Hilltop Memorial', hi: 'पहाड़ी स्मारक' }, kind: 'statue', lat: 24.5966, lng: 73.6847, hotspot: false, hue: ['#68798b','#d8c6a5'],
+    built: { en: 'Maharana Pratap Memorial · Fateh Sagar', hi: 'महाराणा प्रताप स्मारक · फ़तेह सागर' },
+    story: { en: 'Moti Magri is a hill overlooking Fateh Sagar Lake, crowned by a memorial to Maharana Pratap and his horse Chetak. The complex honours Mewar’s history and offers views across the lake and city.', hi: 'मोती मगरी फ़तेह सागर झील के ऊपर स्थित पहाड़ी है, जिसके शिखर पर महाराणा प्रताप और उनके घोड़े चेतक का स्मारक है। यह परिसर मेवाड़ के इतिहास को सम्मान देता है और झील तथा शहर का दृश्य दिखाता है।' },
+    legacy: { en: 'The memorial sculpture depicts Pratap mounted on Chetak. Exhibits across the site tell stories of Mewar’s rulers and battles.', hi: 'स्मारक की मूर्ति में प्रताप को चेतक पर सवार दिखाया गया है। परिसर की प्रदर्शनियाँ मेवाड़ के शासकों और युद्धों की कहानियाँ बताती हैं।' },
+    tip: { en: 'Expect an uphill walk and check opening times locally. Keep to marked paths and allow time for the exhibits.', hi: 'ऊपर की ओर पैदल चढ़ाई के लिए तैयार रहें और स्थानीय रूप से खुलने का समय जाँचें। तय रास्तों पर चलें और प्रदर्शनियाँ देखने का समय रखें।' }, profile: curve([10,2,0.3],[16,2,0.45]),
+  },
+  {
+    id: 'karni-mata-udaipur', area: 'udaipur', img: '/img/karni-mata-udaipur.png', themes: ['spiritual','history','photo'], mapQ: 'Karni Mata Temple Machla Magra Udaipur',
+    name: { en: 'Karni Mata Temple', hi: 'करणी माता मंदिर' }, tag: { en: 'Hilltop Temple & Ropeway', hi: 'पहाड़ी मंदिर और रोपवे' }, kind: 'temple', lat: 24.5685, lng: 73.6815, hotspot: false, hue: ['#b27a50','#e5ca9b'],
+    built: { en: 'Machla Magra · overlooking Lake Pichola', hi: 'मचला मगरी · पिछोला झील के ऊपर' },
+    story: { en: 'Karni Mata Temple stands on Machla Magra hill above Udaipur. Visitors reach it by a steep walk or, when operating, the ropeway. From the hilltop, the lake, City Palace and old city spread out below.', hi: 'करणी माता मंदिर उदयपुर के ऊपर मचला मगरी पहाड़ी पर स्थित है। यहाँ तक खड़ी चढ़ाई से पैदल या चालू होने पर रोपवे से पहुँचा जा सकता है। पहाड़ी से झील, सिटी पैलेस और पुराना शहर दिखाई देता है।' },
+    legacy: { en: 'The shrine is a place of worship as well as a popular viewpoint. Ropeway service and access can change with weather and maintenance.', hi: 'यह मंदिर पूजा-स्थल होने के साथ लोकप्रिय दृश्य-बिंदु भी है। मौसम और रखरखाव के कारण रोपवे सेवा तथा पहुँच में बदलाव हो सकता है।' },
+    tip: { en: 'Check ropeway status before travelling, dress respectfully and avoid the exposed path in heavy rain.', hi: 'जाने से पहले रोपवे की स्थिति जाँचें, सम्मानजनक पहनावा रखें और तेज़ बारिश में खुले रास्ते से बचें।' }, profile: curve([8,1.5,0.3],[18,2,0.7]),
+  },
 ];
 
 export const siteById = (id: string) => SITES.find((s) => s.id === id)!;
@@ -444,6 +509,7 @@ export interface Partner {
   nearSite: string;
   kind: 'artisan' | 'stay';
   img?: string;
+  productImg?: string;
   craft?: L;
   badges?: L[];
   lat: number;
@@ -454,17 +520,17 @@ export interface Partner {
 
 /** Demo rows are marked as samples; website-linked rows cite public business information, not a formal partnership. */
 export const PARTNERS: Partner[] = [
-  { id: 'a1', name: 'Mewar Miniature Studio', nearSite: 'jagdish-temple', kind: 'artisan', craft: { en: 'Miniature painting', hi: 'लघु चित्रकला' }, lat: 24.5784, lng: 73.6829 },
-  { id: 'a2', name: 'Lakeside Silver Workshop', nearSite: 'city-palace', kind: 'artisan', craft: { en: 'Silver jewellery', hi: 'चाँदी के गहने' }, lat: 24.5771, lng: 73.6842 },
-  { id: 'a3', name: 'Kathputli Puppet Corner', nearSite: 'bagore-ki-haveli', kind: 'artisan', craft: { en: 'Puppet making', hi: 'कठपुतली निर्माण' }, lat: 24.5795, lng: 73.6812 },
-  { id: 'a4', name: 'Molela Terracotta Collective', nearSite: 'saheliyon-ki-bari', kind: 'artisan', craft: { en: 'Terracotta plaques', hi: 'मोलेला टेराकोटा' }, lat: 24.6005, lng: 73.6849 },
-  { id: 'a6', name: 'Nathdwara Pichwai Atelier', nearSite: 'shrinathji', kind: 'artisan', craft: { en: 'Pichwai painting', hi: 'पिछवाई चित्रकला' }, lat: 24.9372, lng: 73.8236 },
-  { id: 'a5', name: 'Bandhani & Block-print Atelier', nearSite: 'ahar-cenotaphs', kind: 'artisan', craft: { en: 'Textile printing', hi: 'बंधेज व छपाई' }, lat: 24.5862, lng: 73.7211 },
+  { id: 'a1', name: 'Mewar Miniature Studio', nearSite: 'jagdish-temple', kind: 'artisan', productImg: '/img/products/miniature.svg', craft: { en: 'Miniature painting', hi: 'लघु चित्रकला' }, lat: 24.5784, lng: 73.6829 },
+  { id: 'a2', name: 'Lakeside Silver Workshop', nearSite: 'city-palace', kind: 'artisan', productImg: '/img/products/silver-jewellery.svg', craft: { en: 'Silver jewellery', hi: 'चाँदी के गहने' }, lat: 24.5771, lng: 73.6842 },
+  { id: 'a3', name: 'Kathputli Puppet Corner', nearSite: 'bagore-ki-haveli', kind: 'artisan', productImg: '/img/products/puppets.svg', craft: { en: 'Puppet making', hi: 'कठपुतली निर्माण' }, lat: 24.5795, lng: 73.6812 },
+  { id: 'a4', name: 'Molela Terracotta Collective', nearSite: 'saheliyon-ki-bari', kind: 'artisan', productImg: '/img/products/terracotta.svg', craft: { en: 'Terracotta plaques', hi: 'मोलेला टेराकोटा' }, lat: 24.6005, lng: 73.6849 },
+  { id: 'a6', name: 'Nathdwara Pichwai Atelier', nearSite: 'shrinathji', kind: 'artisan', productImg: '/img/products/pichwai.svg', craft: { en: 'Pichwai painting', hi: 'पिछवाई चित्रकला' }, lat: 24.9372, lng: 73.8236 },
+  { id: 'a5', name: 'Bandhani & Block-print Atelier', nearSite: 'ahar-cenotaphs', kind: 'artisan', productImg: '/img/products/block-print.svg', craft: { en: 'Bandhani, hand-block and textile printing', hi: 'बंधेज, हाथ की ब्लॉक प्रिंट और वस्त्र छपाई' }, lat: 24.5862, lng: 73.7211 },
   { id: 's1', name: 'Lakeview Jharokha Stay', nearSite: 'bagore-ki-haveli', kind: 'stay', img: '/img/stay-lakeview.jpg', badges: [{ en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Plastic-free', hi: 'प्लास्टिक-मुक्त' }], lat: 24.5801, lng: 73.6808 },
   { id: 's2', name: 'Mural Haveli Suites', nearSite: 'city-palace', kind: 'stay', img: '/img/stay-mural.jpg', badges: [{ en: 'Buys from local artisans', hi: 'स्थानीय कारीगरों से खरीद' }, { en: 'Solar hot water', hi: 'सौर गर्म पानी' }], lat: 24.5769, lng: 73.6826 },
   { id: 's3', name: 'Terrace Lakeside Heritage Hotel', nearSite: 'jagdish-temple', kind: 'stay', img: '/img/stay-terrace.jpg', badges: [{ en: 'Farm-to-table', hi: 'खेत से थाली तक' }, { en: 'Refill water stations', hi: 'रीफ़िल पानी केंद्र' }], lat: 24.5792, lng: 73.6832 },
-  { id: 'a7', name: 'Pacific Art Udaipur', nearSite: 'bagore-ki-haveli', kind: 'artisan', craft: { en: 'Mewar miniature painting · workshops and classes', hi: 'मेवाड़ लघु चित्रकला · कार्यशालाएँ और कक्षाएँ' }, lat: 24.5830, lng: 73.6790, mapQ: 'Pacific Art Udaipur, 192 Naga Nagri, Outside Chandpole, Udaipur', website: 'https://www.pacificartudaipur.com/home' },
-  { id: 'a8', name: 'TAAP – The Artisans House', nearSite: 'saheliyon-ki-bari', kind: 'artisan', craft: { en: 'Hand-block-printed textiles and artisan-made home goods', hi: 'हाथ से छपे वस्त्र और कारीगरों द्वारा बने घरेलू सामान' }, lat: 24.6000, lng: 73.6800, mapQ: 'TAAP The Artisans House, 47 Krishna Complex, Bedla Road, Udaipur', website: 'https://taaptheartisanshouse.in/pages/contact-us' },
+  { id: 'a7', name: 'Pacific Art Udaipur', nearSite: 'bagore-ki-haveli', kind: 'artisan', productImg: '/img/products/miniature.svg', craft: { en: 'Mewar miniature painting · workshops and classes', hi: 'मेवाड़ लघु चित्रकला · कार्यशालाएँ और कक्षाएँ' }, lat: 24.5830, lng: 73.6790, mapQ: 'Pacific Art Udaipur, 192 Naga Nagri, Outside Chandpole, Udaipur', website: 'https://www.pacificartudaipur.com/home' },
+  { id: 'a8', name: 'TAAP – The Artisans House', nearSite: 'saheliyon-ki-bari', kind: 'artisan', productImg: '/img/products/block-print.svg', craft: { en: 'Hand-block-printed textiles and artisan-made home goods', hi: 'हाथ से छपे वस्त्र और कारीगरों द्वारा बने घरेलू सामान' }, lat: 24.6000, lng: 73.6800, mapQ: 'TAAP The Artisans House, 47 Krishna Complex, Bedla Road, Udaipur', website: 'https://taaptheartisanshouse.in/pages/contact-us' },
   { id: 's4', name: 'Fateh Garh', nearSite: 'lake-palace', kind: 'stay', badges: [{ en: 'Solar and wind energy', hi: 'सौर और पवन ऊर्जा' }, { en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Recycled building materials', hi: 'पुनर्चक्रित निर्माण सामग्री' }], lat: 24.5753, lng: 73.6803, mapQ: 'Fateh Garh, Bujara, Sisarma Road, Udaipur', website: 'https://www.fatehcollection.com/fateh-garh-udaipur-resort/about-fateh-garh/our-goal.html' },
   { id: 's5', name: 'The Mangal View Residency', nearSite: 'city-palace', kind: 'stay', badges: [{ en: 'Solar panels supply 30% of energy needs', hi: 'सौर पैनल से 30% ऊर्जा की ज़रूरत पूरी' }], lat: 24.5780, lng: 73.6820, mapQ: 'The Mangal View Residency, Sharma Colony, Brahmpuri, Udaipur', website: 'https://www.themangalview.com/' },
   { id: 's6', name: 'Ramada by Wyndham Udaipur Resort and Spa', nearSite: 'fateh-sagar', kind: 'stay', badges: [{ en: 'Solar panels', hi: 'सौर पैनल' }, { en: 'Rainwater harvesting', hi: 'वर्षा जल संचयन' }, { en: 'Treated water reused for gardens', hi: 'उपचारित पानी का बगीचों में पुनः उपयोग' }], lat: 24.6045, lng: 73.6780, mapQ: 'Ramada by Wyndham Udaipur Resort and Spa, Rampura Circle, Kodiyat Main Road, Udaipur', website: 'https://www.ramadaudaipur.com/about' },

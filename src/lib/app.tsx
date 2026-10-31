@@ -7,12 +7,14 @@ import { LANGS } from './langs';
 import { loadCachedPack } from './translate';
 import type { User } from './auth';
 import type { Traveller } from './plan';
+import { earnedTravelBadges } from './badges';
 
 export type Screen =
   | { name: 'home' | 'explore' | 'trail' | 'passport' }
   | { name: 'site' | 'ar'; id: string };
 
 interface Passport { name: string; stamps: Record<string, number>; demo: boolean }
+export interface LocalLeader { id: string; name: string; xp: number; badges: string[] }
 
 interface Ctx {
   lang: Lang;
@@ -34,6 +36,7 @@ interface Ctx {
   online: boolean;
   tick: number; // bumps every minute so crowd numbers refresh
   bump: () => void;
+  leaderboard: LocalLeader[];
 }
 
 const AppCtx = createContext<Ctx>(null as unknown as Ctx);
@@ -51,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [stack, setStack] = useState<Screen[]>([{ name: 'home' }]);
   const [passport, setPassportState] = useState<Passport>(() => load('smarak.passport', { name: '', stamps: {}, demo: true }));
   const [user, setUserState] = useState<User | null>(() => { try { return JSON.parse(localStorage.getItem('smarak.user') || 'null'); } catch { return null; } });
+  const [leaderboard, setLeaderboard] = useState<LocalLeader[]>(() => { try { return JSON.parse(localStorage.getItem('smarak.leaderboard') || '[]'); } catch { return []; } });
   const [traveller, setTravellerState] = useState<Traveller | null>(() => { try { return JSON.parse(localStorage.getItem('smarak.traveller') || 'null'); } catch { return null; } });
   const [online, setOnline] = useState(navigator.onLine);
   const [tick, setTick] = useState(0);
@@ -63,6 +67,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); clearInterval(id); };
   }, []);
 
+  useEffect(() => {
+    const score = Object.keys(passport.stamps).reduce((sum, id) => sum + (SITES.find((site) => site.id === id)?.hotspot ? 10 : SITES.some((site) => site.id === id) ? 25 : 0), 0);
+    if (!score && !passport.name && !user) return;
+    const id = (user?.email || user?.name || 'local-profile').trim().toLocaleLowerCase();
+    const entry: LocalLeader = { id, name: passport.name || user?.name || 'Mewar Traveller', xp: score, badges: earnedTravelBadges(score).map((badge) => badge.title) };
+    const rows = [...leaderboard.filter((row) => row.id !== id), entry].sort((a, b) => b.xp - a.xp || a.name.localeCompare(b.name)).slice(0, 20);
+    localStorage.setItem('smarak.leaderboard', JSON.stringify(rows));
+    setLeaderboard(rows);
+  // Record the current device-local profile once when the app starts.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => { document.documentElement.lang = lang; document.documentElement.dir = LANGS[lang]?.rtl ? 'rtl' : 'ltr'; }, [lang]);
   const setLang = (l: Lang) => {
     if (!loadCachedPack(l)) return;
@@ -70,7 +86,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('smarak.lang', l);
     setLangState(l);
   };
-  const setPassport = (p: Passport) => { localStorage.setItem('smarak.passport', JSON.stringify(p)); setPassportState(p); };
+  const setPassport = (p: Passport) => {
+    localStorage.setItem('smarak.passport', JSON.stringify(p));
+    setPassportState(p);
+    const score = Object.keys(p.stamps).reduce((sum, id) => sum + (SITES.find((site) => site.id === id)?.hotspot ? 10 : SITES.some((site) => site.id === id) ? 25 : 0), 0);
+    const id = (user?.email || user?.name || 'local-profile').trim().toLocaleLowerCase();
+    const entry: LocalLeader = { id, name: p.name || user?.name || 'Mewar Traveller', xp: score, badges: earnedTravelBadges(score).map((badge) => badge.title) };
+    const rows = [...leaderboard.filter((row) => row.id !== id), entry].sort((a, b) => b.xp - a.xp || a.name.localeCompare(b.name)).slice(0, 20);
+    localStorage.setItem('smarak.leaderboard', JSON.stringify(rows));
+    setLeaderboard(rows);
+  };
 
   const signIn = (u: User) => {
     localStorage.setItem('smarak.user', JSON.stringify(u));
@@ -102,7 +127,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value: Ctx = {
     lang, setLang, t: (k) => tr(k, lang), screen: stack[stack.length - 1], go, back, isRoot: stack.length === 1,
-    passport, setPassport, user, signIn, signOut, traveller, setTraveller, xp, levelKey, online, tick, bump: () => setTick((x) => x + 1),
+    passport, setPassport, user, signIn, signOut, traveller, setTraveller, xp, levelKey, online, tick, bump: () => setTick((x) => x + 1), leaderboard,
   };
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
 }

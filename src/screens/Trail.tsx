@@ -25,6 +25,8 @@ export default function Trail() {
         return (
           <div key={p.id} className="card panel" style={{ margin: '0 18px 14px' }}>
             {p.img && <Photo src={p.img} alt={p.name} />}
+            {tab === 'artisan' && p.productImg && <Photo src={p.productImg} alt={`Illustrative preview: ${p.craft?.[lang] ?? 'artisan craft'}`} />}
+            {tab === 'artisan' && p.productImg && <div className="src">Illustrative craft preview</div>}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {tab === 'artisan'
                 ? <Chip>{p.craft![lang]}</Chip>

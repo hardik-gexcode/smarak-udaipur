@@ -11,7 +11,7 @@ Hackathon domain: **Heritage, Tourism & Sustainable Hospitality** · Author: Har
 | **Login** | Google sign-in (official button on the web, native account picker in the APK), a 6-digit code sent by real email or SMS, and guest mode. |
 | **Two traveller experiences** | First launch asks Indian traveller vs international visitor. Indian: home state, Hindi/English, yatra tips, UPI and Nathdwara pilgrimage hints. International: country, first-time-in-India, visitor essentials (etiquette, 112 and 1363 helplines), English with an Indian accent. Both get a day-by-day plan from days, group and interests. No passport or ID numbers are ever asked. |
 | **Time-zone aware** | Greets in the visitor's own local time (Good morning / सुप्रभात ...). Crowd and "best time" always use Udaipur time (IST), so a visitor planning from abroad sees the right numbers. |
-| **All of Mewar** | Udaipur, Eklingji, Nagda, Nathdwara (Shrinathji, Statue of Belief), Haldighati, Kumbhalgarh, Ranakpur and Chittorgarh (fort, Vijay Stambh), with a day-trip planner. |
+| **All of Mewar** | Udaipur, Lake Pichola, Bahubali and Rayta Hills, Gangaur Ghat, Shilpgram, Jag Mandir, Moti Magri, Karni Mata, Eklingji, Nagda, Nathdwara, Haldighati, Kumbhalgarh, Ranakpur and Chittorgarh, with a day-trip planner. |
 | **Photos** | Real photos bundled offline in `public/img` (sites and hotel stays). |
 | **AR / 3D view** | Two modes. 3D: model centred, drag to rotate, pinch to zoom. AR: live rear camera, gyroscope steers the view, Recenter button. No camera or gyro (laptop)? It falls back to 3D. If WebGL is unsupported it says so. |
 | **VR mode** | Tap the headset button for side-by-side stereo for a Cardboard-style viewer. |
@@ -19,10 +19,10 @@ Hackathon domain: **Heritage, Tourism & Sustainable Hospitality** · Author: Har
 | **Ask the guide** | Type or speak (Chrome/Android). Answers come from the built-in heritage pack; no generative AI key or online AI request is used. |
 | **Crowd-aware routing** | Per-site hourly crowd curves + weekend factor + live anonymous check-ins give a density score, best hour, and a "try instead" nudge to the nearest quiet, equally rich site. |
 | **Artisan Trail / Green Stays** | Includes illustrative sample entries and public business listings with directions and official information links. Public listings do not imply a formal partnership. |
-| **Heritage Passport** | Stamps and XP (lesser-known sites earn 2.5x). GPS check-in within 500 m, or Demo mode to try from anywhere. |
+| **Heritage Passport** | Stamps, XP and six travel milestone badges. A device-local leaderboard ranks profiles saved on that device; it is not shared between devices. |
 | **Offline** | PWA precache + local storage. Install it once and it keeps working inside forts and palaces. |
 
-Photos and stays: the first three stay photos and names are illustrative sample entries; one sample photo shows another hotel's signage. Website-linked stays cite public sustainability information. Site photos are still missing for Nagda Sas-Bahu, Chittorgarh Fort, Vijay Stambh, Kumbhalgarh, Ranakpur, Haldighati, and Fateh Sagar; add permission-cleared destination photos before real use. Honest limits: crowd numbers are modelled estimates (not real sensor data), the 3D models are procedural low-poly stand-ins, and offline Q&A is retrieval over the content pack (on-device Gemma is the roadmap, see below).
+Photos and stays: the first three stay photos and names are illustrative sample entries; one sample photo shows another hotel's signage. Website-linked stays cite public sustainability information. The newly added Udaipur attractions use photos attached for this project. Honest limits: artisan product panels are illustrative vector previews rather than photos of a specific item for sale; crowd numbers are modelled estimates (not real sensor data), the 3D models are procedural low-poly stand-ins, and offline Q&A is retrieval over the content pack (on-device Gemma is the roadmap, see below).
 
 ## Run on your laptop
 
@@ -100,7 +100,7 @@ Each monument now has its own hand-built model following its real silhouette (Ci
 
 ## Photos
 
-Photos live in `public/img/<site-id>.jpg` and are picked up automatically by setting `img` on the site in `src/data/sites.ts`. The new Mewar sites (Eklingji, Nagda, Chittorgarh, Vijay Stambh, Kumbhalgarh, Ranakpur, Haldighati, Fateh Sagar) have a drawn cover until you add photos.
+Photos live in `public/img` and are picked up by setting `img` on the site in `src/data/sites.ts`. Attached photos were added for Lake Pichola, Bahubali Hills, Rayta Hills, Gangaur Ghat, Shilpgram, Jag Mandir, Moti Magri and Karni Mata Udaipur. The Lake Pichola page also has a second attached gallery photo.
 
 ## Logo and app icon
 
@@ -108,7 +108,7 @@ Your logo is used as the app icon, adaptive icon, splash and login screen. After
 
 ## Regional translation
 
-Regional UI phrase packs are included in the app bundle. Choosing a supported language changes the interface immediately and works offline; it does not call a translation server or require an API key. Coverage is strongest for Home and trip setup. Any phrase without a reviewed translation, including longer monument descriptions, uses its English source text. English and Hindi have the complete authored content.
+Regional UI phrase packs are included in the app bundle. Choosing a supported language changes the interface immediately and works offline; it does not call a translation server or require an API key. Coverage is strongest for Home and trip setup. Monument names, tags, and longer stories are authored in English and Hindi; other languages currently fall back to English for that long-form content. Artisan product art is an offline illustrative preview, not a photograph or a verified listing of a specific item for sale.
 
 ## Put it on GitHub
 

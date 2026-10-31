@@ -5,7 +5,7 @@ import { useApp } from '../lib/app';
 import { openMap } from '../lib/maps';
 import { zoneParts } from '../lib/time';
 import { speakSeq, splitSentences, stopSpeech } from '../lib/voice';
-import { Chip, Cover, Header, Icon, LangToggle, Meter } from '../ui';
+import { Chip, Cover, Header, Icon, LangToggle, Meter, Photo } from '../ui';
 
 const udaipurHour = () => zoneParts().hour;
 
@@ -66,6 +66,8 @@ export default function SiteScreen({ id }: { id: string }) {
           </div>
         </div>
       </div>
+
+      {site.gallery?.length ? <div className="site-gallery">{site.gallery.map((src) => <Photo key={src} src={src} alt={site.name[lang]} />)}</div> : null}
 
       <div className="card panel">
         <h3>{t('story')} {speaking && <span className="wave"><i /><i /><i /><i /></span>}</h3>

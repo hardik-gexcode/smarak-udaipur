@@ -5,9 +5,10 @@ import { Chip, Header, Icon, LangToggle } from '../ui';
 import { passId } from './Home';
 import { cloudAvailable, gender, loadVoices, saveVoice, savedVoice, setGender, speakSeq, voicesFor } from '../lib/voice';
 import { nativeName } from '../lib/langs';
+import { TRAVEL_BADGES, latestTravelBadge, nextTravelBadge } from '../lib/badges';
 
 export default function Passport() {
-  const { t, lang, passport, setPassport, xp, levelKey, online, user, traveller, setTraveller, signOut } = useApp();
+  const { t, lang, passport, setPassport, xp, levelKey, online, user, traveller, setTraveller, signOut, leaderboard } = useApp();
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [, force] = useState(0);
   useEffect(() => { loadVoices().then(setVoices); }, []);
@@ -20,6 +21,8 @@ export default function Passport() {
     speakSeq([sample], l, () => {}, () => {});
   };
   const got = SITES.filter((s) => passport.stamps[s.id]);
+  const flexBadge = latestTravelBadge(xp);
+  const nextBadge = nextTravelBadge(xp);
 
   return (
     <div className="scroll">
@@ -27,11 +30,36 @@ export default function Passport() {
 
       <div className="ecard">
         <div className="id">{passId(passport.name)}</div>
+        {flexBadge && <div className="ecard-badge"><span>{flexBadge.icon}</span>{lang === 'hi' ? flexBadge.hindi : flexBadge.title}</div>}
         <div className="who">
           <div className="av">{(passport.name || 'S')[0].toUpperCase()}</div>
           <div><div className="nm">{passport.name || t('traveller')}</div><div className="lv">{t(levelKey)}</div></div>
           <div className="xpb">{xp}<small>{t('xp')}</small></div>
         </div>
+      </div>
+
+      <h2 className="sect">Travel badges</h2>
+      <div className="badge-grid">
+        {TRAVEL_BADGES.map((badge) => {
+          const earned = xp >= badge.xp;
+          return <div key={badge.xp} className={`travel-badge ${earned ? 'earned' : ''}`}>
+            <div className="badge-medal">{badge.icon}</div><b>{lang === 'hi' ? badge.hindi : badge.title}</b><small>{earned ? 'Unlocked' : `${badge.xp} XP`}</small>
+          </div>;
+        })}
+      </div>
+      {nextBadge && <div className="card panel badge-progress">
+        <div className="meta">Next: {nextBadge.icon} {lang === 'hi' ? nextBadge.hindi : nextBadge.title} · {Math.max(0, nextBadge.xp - xp)} XP to go</div>
+        <div className="progress-track"><i style={{ width: `${Math.min(100, (xp / nextBadge.xp) * 100)}%` }} /></div>
+      </div>}
+
+      <div className="card panel leaderboard">
+        <h3>Local traveller leaderboard</h3>
+        <div className="src">Saved on this device only</div>
+        {leaderboard.length ? leaderboard.slice(0, 10).map((entry, index) => (
+          <div key={entry.id} className="leader-row">
+            <b className="leader-rank">{index + 1}</b><span className="leader-name">{entry.name}{entry.id === (user?.email || user?.name || 'local-profile').trim().toLocaleLowerCase() ? ' · You' : ''}<small>{entry.badges.length ? entry.badges.join(' · ') : 'Collect your first travel badge'}</small></span><b className="leader-xp">{entry.xp} XP</b>
+          </div>
+        )) : <div className="src">Stamp a place to join this device’s leaderboard.</div>}
       </div>
 
       <h2 className="sect">{t('stamps')} · {got.length}/{SITES.length}</h2>

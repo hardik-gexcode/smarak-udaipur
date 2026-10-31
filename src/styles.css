@@ -29,10 +29,15 @@ h1, h2, h3, p { margin: 0; }
 .hero h1 { font-size: 44px; font-weight: 700; letter-spacing: -.03em; margin-top: 4px; }
 .hero .top { position: absolute; top: 14px; right: 16px; }
 .home-hero { padding-top: 96px; }
-.home-mascot { position: absolute; top: 12px; left: 50%; width: 60px; height: 60px; transform: translateX(-50%); border: 3px solid rgba(255,255,255,.88); border-radius: 50%; object-fit: cover; object-position: 50% 24%; background: #fff; box-shadow: 0 5px 16px rgba(72,34,20,.22); }
+.home-mascot { position: absolute; top: 12px; left: 50%; width: 84px; height: 84px; transform: translateX(-50%); border: 3px solid rgba(255,255,255,.88); border-radius: 50%; object-fit: cover; object-position: 50% 24%; background: #fff; box-shadow: 0 5px 16px rgba(72,34,20,.22); }
 .mascot-intro { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; }
-.mascot-intro img { position: absolute; top: 50%; left: 50%; width: 184px; height: 184px; border: 5px solid rgba(255,255,255,.95); border-radius: 50%; object-fit: cover; object-position: 50% 24%; background: #fff; box-shadow: 0 18px 48px rgba(40,20,10,.28); animation: mascot-arrive 1.4s cubic-bezier(.2,.75,.25,1) both; }
-@keyframes mascot-arrive { 0% { top: 50%; opacity: 0; transform: translate(-50%,-50%) scale(.72); } 14% { opacity: 1; } 72% { opacity: 1; } 100% { top: 54px; opacity: 0; transform: translate(-50%,-50%) scale(.33); } }
+.mascot-intro img { position: absolute; top: 50%; left: 50%; width: min(68vw, 286px); height: min(68vw, 286px); border: 6px solid rgba(255,255,255,.97); border-radius: 36px; object-fit: cover; object-position: 50% 24%; background: #fff; box-shadow: 0 22px 60px rgba(40,20,10,.38); animation: mascot-arrive 2s cubic-bezier(.2,.75,.25,1) both; }
+.mascot-intro-copy { position: absolute; top: calc(50% + min(34vw, 150px)); left: 16px; right: 16px; display: grid; justify-items: center; gap: 4px; color: #fff; text-align: center; text-shadow: 0 2px 14px rgba(20,12,10,.65); animation: mascot-copy 2s ease both; }
+.mascot-intro-copy b { font-size: clamp(28px, 8vw, 40px); line-height: 1.15; }
+.mascot-intro-copy span { font-size: clamp(17px, 4.5vw, 22px); font-weight: 600; }
+.mascot-intro-copy small { margin-top: 6px; letter-spacing: .18em; font-size: 11px; font-weight: 700; }
+@keyframes mascot-arrive { 0% { top: 50%; opacity: 0; transform: translate(-50%,-50%) scale(.68); } 12% { opacity: 1; } 66% { top: 50%; opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { top: 54px; opacity: 0; transform: translate(-50%,-50%) scale(.29); } }
+@keyframes mascot-copy { 0%, 60% { opacity: 0; transform: translateY(12px); } 72% { opacity: 1; transform: translateY(0); } 88% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
 @media (prefers-reduced-motion: reduce) { .mascot-intro { display: none; } }
 .status { position: absolute; left: 12px; right: 12px; bottom: 66px; display: flex; align-items: center; gap: 14px; padding: 8px 18px 8px 8px; border-radius: 999px; color: var(--ink); text-align: left;
   background: rgba(255,255,255,.72); backdrop-filter: blur(14px); box-shadow: inset 0 2px 0 #fff, 0 8px 20px rgba(0,0,0,.08); font-size: 17px; font-weight: 500; }
@@ -96,6 +101,8 @@ h1, h2, h3, p { margin: 0; }
 
 /* stories + ecard */
 .rail { display: flex; gap: 14px; overflow-x: auto; padding: 0 22px 8px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.site-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 14px 18px 0; }
+.site-gallery .photo { margin: 0; height: 145px; object-fit: cover; }
 .story { flex: none; scroll-snap-align: start; width: 178px; height: 236px; border-radius: 34px; overflow: hidden; position: relative; text-align: left; color: #fff; box-shadow: 0 14px 28px rgba(0,0,0,.16); }
 .story .cover { position: absolute; inset: 0; } .story .cover svg { height: 70%; }
 .story::after { content: ''; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(30,20,20,.7)); }
@@ -104,6 +111,8 @@ h1, h2, h3, p { margin: 0; }
 .ecard { position: relative; margin: 0 22px; height: 190px; border-radius: 34px; overflow: hidden; color: #fff; padding: 20px 22px;
   background: radial-gradient(90% 120% at 15% 0%, #f7a273 0%, rgba(247,162,115,0) 60%), linear-gradient(135deg, #ee5a30, #cc3a1c 70%, #e3704f); box-shadow: 0 18px 34px rgba(220,80,40,.3), inset 0 2px 0 rgba(255,255,255,.35); }
 .ecard .id { font-size: 28px; font-weight: 700; letter-spacing: .01em; text-align: right; }
+.ecard-badge { position: absolute; top: 18px; left: 20px; max-width: 58%; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 8px 12px; background: rgba(90,32,18,.2); backdrop-filter: blur(8px); font-size: 14px; line-height: 1.1; font-weight: 700; }
+.ecard-badge span { font-size: 19px; }
 .ecard .who { position: absolute; left: 20px; bottom: 18px; right: 20px; display: flex; align-items: center; gap: 14px; }
 .ecard .av { width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.9); color: var(--orange); font-size: 26px; font-weight: 700; box-shadow: 0 6px 14px rgba(0,0,0,.25); }
 .ecard .nm { font-size: 21px; font-weight: 600; } .ecard .lv { opacity: .75; font-size: 15px; }
@@ -128,6 +137,21 @@ h1, h2, h3, p { margin: 0; }
 .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 3px 6px rgba(0,0,0,.25); transition: .2s; }
 .sw.on { background: #34c759; } .sw.on::after { left: 25px; }
 .stamps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.badge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 22px; }
+.travel-badge { min-height: 138px; padding: 14px 10px; border-radius: 24px; display: grid; justify-items: center; align-content: center; gap: 6px; text-align: center; color: #8e8e93; background: #e9e8e8; box-shadow: inset 0 2px 6px rgba(0,0,0,.06); }
+.travel-badge.earned { color: #fff; background: radial-gradient(circle at 30% 0%, #ffd394, transparent 54%), linear-gradient(145deg, #ef6b38, #8d3927); box-shadow: 0 12px 24px rgba(170,67,37,.22), inset 0 1px 0 rgba(255,255,255,.55); }
+.badge-medal { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.78); font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.travel-badge b { font-size: 14px; }
+.travel-badge small { font-size: 12px; opacity: .78; }
+.badge-progress { gap: 10px; }
+.progress-track { height: 10px; overflow: hidden; border-radius: 99px; background: #dedee1; }
+.progress-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f6aa71, #e6502c); }
+.leaderboard { margin-top: 18px; }
+.leader-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.07); }
+.leader-rank { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #f0dfcf; color: #773a28; }
+.leader-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 650; }
+.leader-name small { display: block; overflow: hidden; color: var(--mute); font-size: 11px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.leader-xp { flex: none; font-size: 14px; }
 .stampc { aspect-ratio: 1; border-radius: 26px; display: grid; place-items: center; text-align: center; padding: 8px; font-size: 12.5px; font-weight: 600; color: #aaa; background: #ececee; box-shadow: inset 0 2px 6px rgba(0,0,0,.08); }
 .stampc.got { color: #fff; box-shadow: 0 10px 18px rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.4); }
 .toast { position: absolute; left: 22px; right: 22px; bottom: 104px; z-index: 30; padding: 14px 18px; border-radius: 22px; background: rgba(28,28,30,.92); color: #fff; font-size: 15px; line-height: 1.4; backdrop-filter: blur(10px); }
