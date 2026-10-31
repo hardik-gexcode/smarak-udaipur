@@ -104,7 +104,9 @@ Photos live in `public/img` and are picked up by setting `img` on the site in `s
 
 ## Live voice guide
 
-The AR/3D guide has an optional live speech-to-speech conversation. Add `OPENAI_API_KEY` as a server-side Vercel environment variable (never `VITE_OPENAI_API_KEY`), then redeploy. The browser receives a short-lived Realtime credential from `/api/realtime-token`; the standard key remains on the server. HTTPS and microphone permission are required. API usage is metered. Without this variable, the existing on-device guide continues to work.
+The AR/3D guide has an optional Gemini Live speech-to-speech conversation. Add `GEMINI_API_KEY` as a server-side Vercel environment variable (do not prefix it with `VITE_`), then redeploy. The browser receives a one-use short-lived token from `/api/gemini-live-token`; the permanent key remains on the server. HTTPS and microphone permission are required. Gemini Live availability, quotas, and pricing depend on your Google AI Studio project. Without the key, the existing on-device guide continues to work.
+
+The Home crowd map uses OpenStreetMap tiles with attribution and overlays time-based estimated crowd levels at Udaipur-area destinations. The crowd colors represent modelled estimates, not live sensor data. Satellite imagery needs a separate satellite-map provider key; the Gemini key does not provide map imagery.
 
 ## Logo and app icon
 
@@ -131,7 +133,7 @@ src/lib/voice.ts       Regional TTS with captions, voice input, installed-voice 
 src/ar/models.ts       Distinct procedural 3D landmark scenes; optional scanned GLB override at public/models/<site-id>.glb
 src/screens/*          Home, Explore, Site, Trail, Passport, ARView
 api/ask.ts             Optional Gemini text answers for Ask Guide
-api/realtime-token.ts  Server-minted short-lived credential for live voice sessions
+api/gemini-live-token.ts  Server-minted one-use token for Gemini Live voice sessions
 api/tts.ts             Optional cloud Indian voices
 api/send-code.ts, verify-code.ts   Email verification codes (stateless, signed)
 api/send-phone-code.ts, verify-phone-code.ts   Twilio Verify SMS codes

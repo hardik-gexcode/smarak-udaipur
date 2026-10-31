@@ -7,7 +7,14 @@ import { Chip, Header, Icon, Photo } from '../ui';
 export default function Trail() {
   const { t, lang, go } = useApp();
   const [tab, setTab] = useState<'artisan' | 'stay'>(pref.get('trail', 'artisan') as 'artisan' | 'stay');
-  const list = PARTNERS.filter((p) => p.kind === tab);
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLocaleLowerCase();
+  const list = PARTNERS.filter((p) => p.kind === tab).filter((p) => {
+    if (!needle) return true;
+    const near = siteById(p.nearSite);
+    const words = [p.name, p.craft?.en, p.craft?.[lang], ...(p.badges ?? []).flatMap((badge) => [badge.en, badge[lang]]), near.name.en, near.name[lang]];
+    return words.some((word) => word?.toLocaleLowerCase().includes(needle));
+  });
 
   return (
     <div className="scroll">
@@ -20,6 +27,8 @@ export default function Trail() {
           </div>
         }
       />
+      <label className="screen-search"><Icon n="compass" size={19} /><span className="sr-only">Search artisans and stays</span><input type="search" placeholder="Search artisans, crafts, stays…" value={query} onChange={(event) => setQuery(event.target.value)} /><button type="button" aria-label="Clear search" onClick={() => setQuery('')} hidden={!query}>×</button></label>
+      {list.length === 0 && <div className="search-empty">No {tab === 'artisan' ? 'artisans' : 'stays'} found for “{query}”.</div>}
       {list.map((p) => {
         const near = siteById(p.nearSite);
         return (

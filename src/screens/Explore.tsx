@@ -11,8 +11,11 @@ export default function Explore() {
   const { t, lang, go } = useApp();
   const [view, setView] = useState<'list' | 'cards'>('list');
   const [filter, setFilter] = useState<Filter>(pref.get('filter', 'all') as Filter);
+  const [query, setQuery] = useState('');
 
-  const items = SITES.filter((s) => (filter === 'quiet' ? levelOf(density(s)) === 'quiet' : filter === 'hot' ? s.hotspot : true));
+  const needle = query.trim().toLocaleLowerCase();
+  const items = SITES.filter((s) => (filter === 'quiet' ? levelOf(density(s)) === 'quiet' : filter === 'hot' ? s.hotspot : true))
+    .filter((s) => !needle || [s.name.en, s.name[lang], s.tag.en, s.tag[lang], s.built.en, s.built[lang], s.area, s.kind].some((value) => value?.toLocaleLowerCase().includes(needle)));
   const open = (s: Site) => go({ name: 'site', id: s.id });
 
   return (
@@ -26,11 +29,14 @@ export default function Explore() {
           </div>
         }
       />
+      <label className="screen-search"><Icon n="compass" size={19} /><span className="sr-only">Search destinations</span><input type="search" placeholder="Search places, monuments…" value={query} onChange={(event) => setQuery(event.target.value)} /><button type="button" aria-label="Clear search" onClick={() => setQuery('')} hidden={!query}>×</button></label>
       <div className="filters">
         {([['all', 'all'], ['quiet', 'quietNow'], ['hot', 'hotspots']] as const).map(([f, k]) => (
           <button key={f} className={`pill ${filter === f ? 'on' : ''}`} style={{ height: 44 }} onClick={() => setFilter(f)}>{t(k)}</button>
         ))}
       </div>
+
+      {items.length === 0 && <div className="search-empty">No places found for “{query}”. Try another name.</div>}
 
       {view === 'list' ? (
         items.map((s) => (

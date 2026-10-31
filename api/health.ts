@@ -16,7 +16,7 @@ export default function handler(req: any, res: any) {
     phone,
     translation: 'offline-bundled',
     cloudSpeech: !!process.env.GOOGLE_TTS_API_KEY,
-    openaiVoice: !!process.env.OPENAI_API_KEY,
+    geminiVoice: !!process.env.GEMINI_API_KEY,
     status: 'operational',
     instantAuthFallback: true,
   });

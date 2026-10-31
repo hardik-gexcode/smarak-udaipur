@@ -9,6 +9,7 @@ import { UDAIPUR_TZ, clock, differsFromUdaipur, greeting, timeTip, zoneParts } f
 import { splitSentences } from '../lib/voice';
 import { Chip, Icon, LangToggle, Photo } from '../ui';
 import { latestTravelBadge } from '../lib/badges';
+import CrowdMap from '../ui/CrowdMap';
 
 const mascotIntroKey = 'smarak.mascotIntroPlayed';
 const shouldPlayMascotIntro = () => {
@@ -92,16 +93,7 @@ export default function Home() {
       <section className="home-crowd-map" aria-label="Estimated crowd heat map">
         <div className="crowd-map-heading"><div><h2>Crowd heat map</h2><small>Time-based estimate · {clock(UDAIPUR_TZ)} IST</small></div><button className="pill" onClick={() => go({ name: 'explore' })}>All places</button></div>
         <div className="crowd-map-legend"><span><i className="low" />Low</span><span><i className="mid" />Moderate</span><span><i className="high" />High</span></div>
-        <div className="crowd-map-grid">
-          {SITES.map((site) => {
-            const crowd = density(site);
-            const level = levelOf(crowd);
-            const band = level === 'quiet' ? 'low' : level === 'busy' ? 'mid' : 'high';
-            return <button key={site.id} className={`crowd-tile ${band}`} onClick={() => go({ name: 'site', id: site.id })}>
-              <i className="crowd-dot" /><span>{site.name[lang]}</span><b>{crowd}%</b>
-            </button>;
-          })}
-        </div>
+        <CrowdMap />
         <div className="src">Modelled from each place’s typical hourly pattern; live sensor counts are not available.</div>
       </section>
 
